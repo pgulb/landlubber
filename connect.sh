@@ -1,11 +1,15 @@
 #!/usr/bin/env bash
 
 ./pretty_log.sh "Running connect.sh"
+source ./default.env &&
+source ./.env ;
 
 case $1 in
 
     1 | 2 | 3)
-        ssh -i $2 -o StrictHostKeyChecking=no root@$(cat ./output/public_ipv4-$1)
+        ./pretty_log.sh "Connecting to node #$1"
+        cp ./output/* ./
+        ssh -i $PRIVKEY -o StrictHostKeyChecking=no root@$(cat ./output/public_ipv4-$1)
         ;;
 
     *)

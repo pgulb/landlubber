@@ -2,7 +2,7 @@
 
 # $1 = Public key
 # $2 = HCLOUD_TOKEN
-# $3 = 0/1 keep/remove ssh key from hcloud
+# $3 = 0/1 - keep/remove ssh key from hcloud
 
 ./pretty_log.sh "Running init_hcloud.sh"
 
