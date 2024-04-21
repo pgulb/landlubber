@@ -5,9 +5,10 @@
 # $3 = node name
 
 ip4=""
+./pretty_log.sh "Running create.sh"
 
 function create_vm() {
-    echo "Creating VM $3"
+    ./pretty_log.sh "Creating VM $3"
     mkdir -p ./output &&
     ./hcloud server create --location fsn1 --ssh-key landlubber-key \
     --name "$3" --type cax11 --image rocky-9 -o json \
@@ -16,12 +17,12 @@ function create_vm() {
 }
 
 function get_ip4() {
-    echo "Getting IP4 for $3"
+    ./pretty_log.sh "Getting IP4 for $3"
     ip4=$(cat ./output/public_ipv4-$1)
 }
 
 function kubeadm_init() {
-    echo "Running kubeadm init on $3"
+    ./pretty_log.sh "Running kubeadm init on $3, this may take a while"
     scp -i $2 -o StrictHostKeyChecking=no \
     ./setup_kubeadm.sh root@$ip4:/root/ &&
     ssh -i $2  -o StrictHostKeyChecking=no root@$ip4 \
@@ -31,13 +32,13 @@ function kubeadm_init() {
 }
 
 function kubeadm_join() {
-    echo "Running kubeadm join on $3"
+    ./pretty_log.sh "Running kubeadm join on $3, this may take a while"
     # TODO with kubeadm init
     exit 1
 }
 
 function download_outputs() {
-    echo "Downloading outputs for $3"
+    ./pretty_log.sh "Downloading outputs for $3"
     scp -i $2 -o StrictHostKeyChecking=no \
     root@$ip4:/root/setup_kubeadm.log \
     ./output/setup_kubeadm.log-$ip4 &&
