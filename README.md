@@ -4,7 +4,7 @@ Dockerized script collection to provision 3-node Kubernetes cluster on Hetzner C
 
 ## usage
 
-Create .env file with HCLOUD_TOKEN and any values you would wish to ovveride from default.env
+Create .env file with HCLOUD_TOKEN and any values you would wish to override from default.env
 
 If you want to use existing SSH key, add them to PUBKEY and PRIVKEY in .env and attach as volumes just like .env to /landlubber directory
 

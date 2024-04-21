@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# $1 = 0/1 - kubeadm init or join
+
 # disable SELinux and set network forwarding
 # needed for Kubernetes to work correctly
 sudo setenforce 0
@@ -11,10 +13,10 @@ sysctl -p
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
-baseurl=https://pkgs.k8s.io/core:/stable:/v1.30/rpm/
+baseurl=https://pkgs.k8s.io/core:/stable:/vKUBE_VER/rpm/
 enabled=1
 gpgcheck=1
-gpgkey=https://pkgs.k8s.io/core:/stable:/v1.30/rpm/repodata/repomd.xml.key
+gpgkey=https://pkgs.k8s.io/core:/stable:/vKUBE_VER/rpm/repodata/repomd.xml.key
 exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
 EOF
 sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
@@ -26,10 +28,10 @@ sudo dnf install -y kubelet kubeadm kubectl docker-ce docker-ce-cli --disableexc
 systemctl enable --now kubelet
 
 # download cri-dockerd
-wget https://github.com/Mirantis/cri-dockerd/releases/download/v0.3.12/cri-dockerd-0.3.12.arm64.tgz
-tar -xf cri-dockerd-0.3.12.arm64.tgz
+wget https://github.com/Mirantis/cri-dockerd/releases/download/vCRI_DOCKERD_VER/cri-dockerd-CRI_DOCKERD_VER.arm64.tgz
+tar -xf cri-dockerd-CRI_DOCKERD_VER.arm64.tgz
 mv cri-dockerd/cri-dockerd /usr/local/bin
-rm -rf ./cri-dockerd/ cri-dockerd-0.3.12.arm64.tgz
+rm -rf ./cri-dockerd/ cri-dockerd-CRI_DOCKERD_VER.arm64.tgz
 
 # configure cri-docker service
 wget https://raw.githubusercontent.com/Mirantis/cri-dockerd/master/packaging/systemd/cri-docker.service
@@ -43,17 +45,29 @@ systemctl start docker
 systemctl enable docker
 systemctl start cri-docker
 
-# run kubeadm
-kubeadm init --cri-socket unix:///var/run/cri-dockerd.sock
+# run kubeadm init or join
+case $1 in
+    0)
+        echo "Running kubeadm init"
+        kubeadm init --upload-certs --cri-socket unix:///var/run/cri-dockerd.sock
 
-# install calico and enable pod scheduling on node
-sleep 60
-echo 'source <(kubectl completion bash)' >> ~/.bashrc
-echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> ~/.bashrc
-export KUBECONFIG=/etc/kubernetes/admin.conf
-kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
-kubectl taint nodes --all node-role.kubernetes.io/control-plane-
-kubectl label nodes --all node.kubernetes.io/exclude-from-external-load-balancers-
-sleep 30
-clear
-kubectl get all -A
+        # install calico and enable pod scheduling on node
+        sleep 60
+        echo 'source <(kubectl completion bash)' >> ~/.bashrc
+        echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> ~/.bashrc
+        export KUBECONFIG=/etc/kubernetes/admin.conf
+        kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+        kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+        kubectl label nodes --all node.kubernetes.io/exclude-from-external-load-balancers-
+        sleep 30
+        clear
+        kubectl get all -A
+        ;;
+    1)
+        echo "Running kubeadm join in next create.sh step"
+        ;;
+    *)
+        echo "Error - no parameter passed"
+        exit 1
+        ;;
+esac

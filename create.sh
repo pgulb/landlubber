@@ -26,28 +26,53 @@ function kubeadm_init() {
     scp -i $2 -o StrictHostKeyChecking=no \
     ./setup_kubeadm.sh root@$ip4:/root/ &&
     ssh -i $2  -o StrictHostKeyChecking=no root@$ip4 \
-    'chmod +x /root/setup_kubeadm.sh && /root/setup_kubeadm.sh > /root/setup_kubeadm.log 2>&1 && \
+    'chmod +x /root/setup_kubeadm.sh && /root/setup_kubeadm.sh 0 > /root/setup_kubeadm.log 2>&1 && \
     rm -f /root/setup_kubeadm.sh && \
-    grep -B1 discovery-token-ca-cert-hash /root/setup_kubeadm.log > /root/kubeadm_join'
+    sleep 15 &&
+    grep -B1 discovery-token-ca-cert-hash /root/setup_kubeadm.log | sed \
+    "s+--token+--cri-socket unix:///var/run/cri-dockerd.sock --token+" > /root/kubeadm_join.sh && \
+    chmod +x /root/kubeadm_join.sh'
 }
 
 function kubeadm_join() {
     ./pretty_log.sh "Running kubeadm join on $3, this may take a while"
-    # TODO with kubeadm init
-    exit 1
+    scp -i $2 -o StrictHostKeyChecking=no \
+    ./setup_kubeadm.sh root@$ip4:/root/ &&
+    scp -i $2 -o StrictHostKeyChecking=no \
+    ./output/kubeadm_join.sh root@$ip4:/root/ &&
+    ssh -i $2  -o StrictHostKeyChecking=no root@$ip4 \
+    '/root/setup_kubeadm.sh 1 > /root/setup_kubeadm.log 2>&1 &&
+    /root/kubeadm_join.sh >> /root/setup_kubeadm.log 2>&1' &&
+    rm -f /root/setup_kubeadm.sh /root/kubeadm_join.sh
 }
 
 function download_outputs() {
     ./pretty_log.sh "Downloading outputs for $3"
-    scp -i $2 -o StrictHostKeyChecking=no \
-    root@$ip4:/root/setup_kubeadm.log \
-    ./output/setup_kubeadm.log-$ip4 &&
-    scp -i $2 -o StrictHostKeyChecking=no \
-    root@$ip4:/etc/kubernetes/admin.conf \
-    ./output/kubeconfig-$ip4 &&
-    scp -i $2 -o StrictHostKeyChecking=no \
-    root@$ip4:/root/kubeadm_join \
-    ./output/kubeadm_join-$ip4
+
+    case $1 in
+    1)
+        scp -i $2 -o StrictHostKeyChecking=no \
+        root@$ip4:/root/setup_kubeadm.log \
+        ./output/setup_kubeadm.log-$1 &&
+        scp -i $2 -o StrictHostKeyChecking=no \
+        root@$ip4:/etc/kubernetes/admin.conf \
+        ./output/.kubeconfig &&
+        scp -i $2 -o StrictHostKeyChecking=no \
+        root@$ip4:/root/kubeadm_join.sh \
+        ./output/kubeadm_join.sh
+        ;;
+
+    2 | 3)
+        scp -i $2 -o StrictHostKeyChecking=no \
+        root@$ip4:/root/setup_kubeadm.log \
+        ./output/setup_kubeadm.log-$1
+        ;;
+
+    *)
+        echo "Wrong param for download_outputs"
+        exit 1
+        ;;
+    esac
 }
 
 case $1 in
@@ -62,6 +87,7 @@ case $1 in
         create_vm $1 $2 $3
         get_ip4 $1 $2 $3
         kubeadm_join $1 $2 $3
+        download_outputs $1 $2 $3
         ;;
 
     *)
