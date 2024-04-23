@@ -48,10 +48,11 @@ systemctl start cri-docker
 # run kubeadm init or join
 case $1 in
     0)
-        echo "Running kubeadm init"
-        kubeadm init --upload-certs --cri-socket unix:///var/run/cri-dockerd.sock
+        echo "***Running kubeadm init***"
+        kubeadm init --config ./kubeadm_conf.yml
+        kubeadm init phase upload-certs --upload-certs
 
-        # install calico and enable pod scheduling on node
+        # install calico, enable pod scheduling, install metrics server
         sleep 60
         echo 'source <(kubectl completion bash)' >> ~/.bashrc
         echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> ~/.bashrc
@@ -60,6 +61,8 @@ case $1 in
         kubectl taint nodes --all node-role.kubernetes.io/control-plane-
         kubectl label nodes --all node.kubernetes.io/exclude-from-external-load-balancers-
         sleep 30
+        kubectl get csr | grep -E 'Pending' | awk '{print $1}' | xargs -I {} kubectl certificate approve {}
+        kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
         clear
         kubectl get all -A
         ;;

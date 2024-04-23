@@ -25,9 +25,11 @@ function kubeadm_init() {
     ./pretty_log.sh "Running kubeadm init on $3, this may take a while"
     scp -i $2 -o StrictHostKeyChecking=no \
     ./setup_kubeadm.sh root@$ip4:/root/ &&
+    scp -i $2 -o StrictHostKeyChecking=no \
+    ./kubeadm_conf.yml root@$ip4:/root/ &&
     ssh -i $2  -o StrictHostKeyChecking=no root@$ip4 \
     'chmod +x /root/setup_kubeadm.sh && /root/setup_kubeadm.sh 0 > /root/setup_kubeadm.log 2>&1 && \
-    rm -f /root/setup_kubeadm.sh && \
+    rm -f /root/setup_kubeadm.sh /root/kubeadm_conf.yml && \
     sleep 15 &&
     grep -B1 discovery-token-ca-cert-hash /root/setup_kubeadm.log | sed \
     "s+--token+--cri-socket unix:///var/run/cri-dockerd.sock --token+" > /root/kubeadm_join.sh && \
