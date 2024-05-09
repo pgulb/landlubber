@@ -37,8 +37,10 @@ sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/dock
 
 # install necessary packages
 sudo dnf install -y epel-release
-sudo dnf install -y dnf-plugins-core htop tar bash-completion git
+sudo dnf install -y dnf-plugins-core htop tar bash-completion git vim jq iscsi-initiator-utils nfs-utils
 sudo dnf install -y kubelet kubeadm kubectl docker-ce docker-ce-cli --disableexcludes=kubernetes
+sudo systemctl start iscsid
+sudo systemctl enable iscsid
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
 chmod 700 get_helm.sh
 ./get_helm.sh
@@ -106,6 +108,13 @@ case $1 in
             kubectl apply -f ./event_exp_config.yml
             kubectl apply -f ./event_exporter.yml
         fi
+
+        # run Longhorn requirements check
+        curl -s https://raw.githubusercontent.com/longhorn/longhorn/v1.6.1/scripts/environment_check.sh | sh
+
+        # install Longhorn
+        kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.6.1/deploy/longhorn.yaml
+        sleep 60
 
         echo "-----[-----init complete-----]-----"
         exit 0
