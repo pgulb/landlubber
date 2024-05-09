@@ -14,4 +14,8 @@ if [ $3 -eq 0 ]; then
 else
     ./hcloud ssh-key delete landlubber-key
     ./hcloud ssh-key create --name landlubber-key --public-key-from-file $1
+    ./pretty_log.sh "Creating hcloud network"
+    ./hcloud network create --name=landlubber --ip-range 10.10.0.0/16
+    ./hcloud network add-subnet landlubber \
+    --network-zone=eu-central --type=server --ip-range 10.10.0.0/16
 fi

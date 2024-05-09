@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 
 # $1 = 0/1 - kubeadm init or join
+# $2 = INSTALL_K8S_DASHBOARD
+# $3 = INSTALL_EVENT_EXPORTER
 
 # disable SELinux and set network forwarding
 # needed for Kubernetes to work correctly
@@ -8,6 +10,18 @@ sudo setenforce 0
 sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
 sysctl -p
+
+# add IPs from private hetzner network to hosts file
+cat <<EOF | sudo tee -a /etc/cloud/templates/hosts.redhat.tmpl
+10.10.0.2  NODE1
+10.10.0.3  NODE2
+10.10.0.4  NODE3
+EOF
+cat <<EOF | sudo tee -a /etc/hosts
+10.10.0.2  NODE1
+10.10.0.3  NODE2
+10.10.0.4  NODE3
+EOF
 
 # add kubernetes and docker repo
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
@@ -21,10 +35,14 @@ exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
 EOF
 sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
-# install kubeadm and utils
+# install necessary packages
 sudo dnf install -y epel-release
-sudo dnf install -y dnf-plugins-core htop tar bash-completion
+sudo dnf install -y dnf-plugins-core htop tar bash-completion git
 sudo dnf install -y kubelet kubeadm kubectl docker-ce docker-ce-cli --disableexcludes=kubernetes
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+rm -f ./get_helm.sh
 systemctl enable --now kubelet
 
 # download cri-dockerd
@@ -51,23 +69,50 @@ case $1 in
         echo "***Running kubeadm init***"
         kubeadm init --config ./kubeadm_conf.yml
         kubeadm init phase upload-certs --upload-certs
+        sleep 100
 
-        # install calico, enable pod scheduling, install metrics server
-        sleep 60
+        # add kubectl completion and point kubectl to the admin.conf
         echo 'source <(kubectl completion bash)' >> ~/.bashrc
         echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> ~/.bashrc
         export KUBECONFIG=/etc/kubernetes/admin.conf
-        kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+
+        # install calico        
+        kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/tigera-operator.yaml
+        curl https://raw.githubusercontent.com/projectcalico/calico/master/manifests/custom-resources.yaml -O
+        sed -i 's/cidr: 192\.168\.0\.0\/16/cidr: 10.244.0.0\/16/g' custom-resources.yaml
+        kubectl create -f custom-resources.yaml
+        sleep 30
+
+        # enable pod scheduling
         kubectl taint nodes --all node-role.kubernetes.io/control-plane-
         kubectl label nodes --all node.kubernetes.io/exclude-from-external-load-balancers-
         sleep 30
-        kubectl get csr | grep -E 'Pending' | awk '{print $1}' | xargs -I {} kubectl certificate approve {}
+
+        # install metrics-server
         kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-        clear
-        kubectl get all -A
+
+        if [ "$2" = "1" ]; then
+            # install kubernetes-dashboard
+            helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/ &&
+            helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+            --create-namespace --namespace kubernetes-dashboard &&
+            kubectl apply -f ./dashboard_user.yml &&
+            sleep 5 &&
+            kubectl -n kubernetes-dashboard create token admin-user > ./dashboard_token
+        fi
+
+        if [ "$3" = "1" ]; then
+            # install event-exporter
+            kubectl apply -f ./event_exp_config.yml
+            kubectl apply -f ./event_exporter.yml
+        fi
+
+        echo "-----[-----init complete-----]-----"
+        exit 0
         ;;
     1)
         echo "Running kubeadm join in next create.sh step"
+        exit 0
         ;;
     *)
         echo "Error - no parameter passed"
