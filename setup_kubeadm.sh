@@ -3,6 +3,7 @@
 # $1 = 0/1 - kubeadm init or join
 # $2 = INSTALL_K8S_DASHBOARD
 # $3 = INSTALL_EVENT_EXPORTER
+# $4 = INSTALL_LONGHORN
 
 # disable SELinux and set network forwarding
 # needed for Kubernetes to work correctly
@@ -79,11 +80,15 @@ case $1 in
         export KUBECONFIG=/etc/kubernetes/admin.conf
 
         # install calico        
-        kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/master/manifests/tigera-operator.yaml
-        curl https://raw.githubusercontent.com/projectcalico/calico/master/manifests/custom-resources.yaml -O
+        kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.3/manifests/tigera-operator.yaml
+        curl https://raw.githubusercontent.com/projectcalico/calico/v3.27.3/manifests/custom-resources.yaml -O
         sed -i 's/cidr: 192\.168\.0\.0\/16/cidr: 10.244.0.0\/16/g' custom-resources.yaml
         kubectl create -f custom-resources.yaml
-        sleep 30
+        sleep 90
+
+        # install flannel CNI
+        # kubectl apply -f https://github.com/flannel-io/flannel/releases/download/v0.25.1/kube-flannel.yml
+        # sleep 60
 
         # enable pod scheduling
         kubectl taint nodes --all node-role.kubernetes.io/control-plane-
@@ -109,12 +114,14 @@ case $1 in
             kubectl apply -f ./event_exporter.yml
         fi
 
-        # run Longhorn requirements check
-        curl -s https://raw.githubusercontent.com/longhorn/longhorn/v1.6.1/scripts/environment_check.sh | sh
+        if [ "$4" = "1" ]; then
+            # run Longhorn requirements check
+            curl -s https://raw.githubusercontent.com/longhorn/longhorn/v1.6.1/scripts/environment_check.sh | sh
 
-        # install Longhorn
-        kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.6.1/deploy/longhorn.yaml
-        sleep 60
+            # install Longhorn
+            kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.6.1/deploy/longhorn.yaml
+            sleep 60
+        fi
 
         echo "-----[-----init complete-----]-----"
         exit 0

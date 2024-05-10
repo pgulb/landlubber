@@ -14,7 +14,7 @@ sed -i s+NODE1+$NODE1+g ./setup_kubeadm.sh &&
 sed -i s+NODE2+$NODE2+g ./setup_kubeadm.sh &&
 sed -i s+NODE3+$NODE3+g ./setup_kubeadm.sh &&
 
-./create.sh 1 $PRIVKEY $NODE1 $INSTALL_K8S_DASHBOARD $INSTALL_EVENT_EXPORTER &&
+./create.sh 1 $PRIVKEY $NODE1 $INSTALL_K8S_DASHBOARD $INSTALL_EVENT_EXPORTER $INSTALL_LONGHORN &&
 ./create.sh 2 $PRIVKEY $NODE2 &&
 ./create.sh 3 $PRIVKEY $NODE3 &&
 ./sign_csrs.sh 1 $PRIVKEY &&
@@ -41,5 +41,9 @@ if [ "$INSTALL_K8S_DASHBOARD" = "1" ]; then
     ./pretty_log.sh "Command to port-forward dashboard:"
     ./pretty_log.sh "kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443 &"
     ./pretty_log.sh "You can find token for dashboard inside dashboard_token file in output"
+fi
+if [ "$INSTALL_LONGHORN" = "1" ]; then
+    ./pretty_log.sh "You can view Longhorn dashboard by running:"
+    ./pretty_log.sh "kubectl port-forward service/longhorn-frontend 8080:80 -n longhorn-system &"
 fi
 ./pretty_log.sh "------------------------------------------------------------------"
