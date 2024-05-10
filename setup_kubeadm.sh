@@ -38,9 +38,9 @@ EOF
 sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
 # install necessary packages
-sudo dnf install -y epel-release
-sudo dnf install -y dnf-plugins-core htop tar bash-completion git vim jq iscsi-initiator-utils nfs-utils
-sudo dnf install -y kubelet kubeadm kubectl docker-ce docker-ce-cli --disableexcludes=kubernetes
+sudo dnf install -q -y epel-release
+sudo dnf install -q -y dnf-plugins-core htop tar bash-completion git vim jq iscsi-initiator-utils nfs-utils
+sudo dnf install -q -y kubelet kubeadm kubectl docker-ce docker-ce-cli --disableexcludes=kubernetes
 sudo systemctl start iscsid
 sudo systemctl enable iscsid
 curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
