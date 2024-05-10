@@ -14,7 +14,7 @@ sed -i s+NODE1+$NODE1+g ./setup_kubeadm.sh &&
 sed -i s+NODE2+$NODE2+g ./setup_kubeadm.sh &&
 sed -i s+NODE3+$NODE3+g ./setup_kubeadm.sh &&
 
-./create.sh 1 $PRIVKEY $NODE1 $INSTALL_K8S_DASHBOARD $INSTALL_EVENT_EXPORTER $INSTALL_LONGHORN &&
+./create.sh 1 $PRIVKEY $NODE1 $INSTALL_K8S_DASHBOARD $INSTALL_EVENT_EXPORTER $INSTALL_LONGHORN $INSTALL_METRICS_SERVER &&
 ./create.sh 2 $PRIVKEY $NODE2 &&
 ./create.sh 3 $PRIVKEY $NODE3 &&
 ./sign_csrs.sh 1 $PRIVKEY &&

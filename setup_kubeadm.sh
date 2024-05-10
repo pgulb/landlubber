@@ -4,6 +4,7 @@
 # $2 = INSTALL_K8S_DASHBOARD
 # $3 = INSTALL_EVENT_EXPORTER
 # $4 = INSTALL_LONGHORN
+# $5 = INSTALL_METRICS_SERVER
 
 # disable SELinux and set network forwarding
 # needed for Kubernetes to work correctly
@@ -72,7 +73,7 @@ case $1 in
         echo "***Running kubeadm init***"
         kubeadm init --config ./kubeadm_conf.yml
         kubeadm init phase upload-certs --upload-certs
-        sleep 100
+        sleep 150
 
         # add kubectl completion and point kubectl to the admin.conf
         echo 'source <(kubectl completion bash)' >> ~/.bashrc
@@ -84,27 +85,26 @@ case $1 in
         curl https://raw.githubusercontent.com/projectcalico/calico/v3.27.3/manifests/custom-resources.yaml -O
         sed -i 's/cidr: 192\.168\.0\.0\/16/cidr: 10.244.0.0\/16/g' custom-resources.yaml
         kubectl create -f custom-resources.yaml
-        sleep 90
-
-        # install flannel CNI
-        # kubectl apply -f https://github.com/flannel-io/flannel/releases/download/v0.25.1/kube-flannel.yml
-        # sleep 60
+        sleep 150
 
         # enable pod scheduling
         kubectl taint nodes --all node-role.kubernetes.io/control-plane-
         kubectl label nodes --all node.kubernetes.io/exclude-from-external-load-balancers-
         sleep 30
 
-        # install metrics-server
-        kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+        if [ "$5" = "1" ]; then
+            # install metrics-server
+            kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+            sleep 30
+        fi
 
         if [ "$2" = "1" ]; then
             # install kubernetes-dashboard
-            helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/ &&
+            helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
             helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
-            --create-namespace --namespace kubernetes-dashboard &&
-            kubectl apply -f ./dashboard_user.yml &&
-            sleep 5 &&
+            --create-namespace --namespace kubernetes-dashboard
+            kubectl apply -f ./dashboard_user.yml
+            sleep 15
             kubectl -n kubernetes-dashboard create token admin-user > ./dashboard_token
         fi
 
@@ -115,9 +115,6 @@ case $1 in
         fi
 
         if [ "$4" = "1" ]; then
-            # run Longhorn requirements check
-            curl -s https://raw.githubusercontent.com/longhorn/longhorn/v1.6.1/scripts/environment_check.sh | sh
-
             # install Longhorn
             kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.6.1/deploy/longhorn.yaml
             sleep 60

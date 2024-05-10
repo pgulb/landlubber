@@ -6,6 +6,7 @@
 # $4 = INSTALL_K8S_DASHBOARD
 # $5 = INSTALL_EVENT_EXPORTER
 # $6 = INSTALL_LONGHORN
+# $7 = INSTALL_METRICS_SERVER
 
 ip4=""
 ./pretty_log.sh "Running create.sh"
@@ -34,7 +35,7 @@ function kubeadm_init() {
     scp -i $2 -o StrictHostKeyChecking=no \
     ./dashboard_user.yml root@$ip4:/root/ &&
     ssh -i $2 -o StrictHostKeyChecking=no root@$ip4 \
-    "/root/setup_kubeadm.sh 0 $4 $5 $6 > /root/setup_kubeadm.log 2>&1 && \
+    "/root/setup_kubeadm.sh 0 $4 $5 $6 $7 > /root/setup_kubeadm.log 2>&1 && \
     rm -f /root/setup_kubeadm.sh /root/kubeadm_conf.yml"
     ssh -i $2 -o StrictHostKeyChecking=no root@$ip4 \
     'grep -B1 discovery-token-ca-cert-hash /root/setup_kubeadm.log | tail -2 | sed \
