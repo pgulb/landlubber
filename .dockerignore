@@ -5,3 +5,7 @@ id_*
 hcloud
 Dockerfile
 .env
+.gitignore
+.dockerignore
+.git/
+.github/
