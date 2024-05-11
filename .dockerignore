@@ -4,3 +4,4 @@ id_*
 *.pub
 hcloud
 Dockerfile
+.env

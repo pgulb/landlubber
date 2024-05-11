@@ -31,8 +31,8 @@ function kubeadm_init() {
     sed -i s/CONTROL_PLANE_ENDPOINT/$ip4/g ./kubeadm_conf.yml &&
     scp -i $2 -o StrictHostKeyChecking=no \
     ./setup_kubeadm.sh root@$ip4:/root/ &&
-    # scp -i $2 -o StrictHostKeyChecking=no \
-    # ./*.yml root@$ip4:/root/ &&
+     scp -i $2 -o StrictHostKeyChecking=no \
+     ./kubeadm_conf.yml root@$ip4:/root/ &&
     ssh -i $2 -o StrictHostKeyChecking=no root@$ip4 \
     "/root/setup_kubeadm.sh 0 2>&1 | tee /root/setup_kubeadm.log" &&
     ssh -i $2 -o StrictHostKeyChecking=no root@$ip4 \
