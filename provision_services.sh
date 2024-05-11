@@ -66,11 +66,7 @@ if [ "$INSTALL_VICTORIA_METRICS" = "1" ]; then
         helm install vm-grafana grafana/grafana -f grafana_values.yml -n victoria-metrics
         sleep 30
         kubectl get secret --namespace victoria-metrics vm-grafana \
-            -o jsonpath="{.data.admin-password}" | base64 --decode > ./output/grafana_pass
-        export POD_NAME=$(kubectl get pods --namespace victoria-metrics \
-            -l "app.kubernetes.io/name=grafana,app.kubernetes.io/instance=vm-grafana" \
-            -o jsonpath="{.items[0].metadata.name}")
-        echo -n "kubectl --namespace victoria-metrics port-forward $POD_NAME 3000" > ./output/port_forward_grafana
+        -o jsonpath="{.data.admin-password}" | base64 --decode > ./output/grafana_pass
     else
         ./pretty_log.sh "WARNING: Skipping installing VictoriaMetrics, Longhorn is not installed"
         ./pretty_log.sh "VictoriaMetrics needs persistent storage"

@@ -25,10 +25,11 @@ sleep 30
 ./pretty_log.sh "Provisioning services with kubectl and helm"
 ./provision_services.sh
 
-# ./pretty_log.sh "Rebooting nodes"
-# ./hcloud server reboot $NODE1
-# ./hcloud server reboot $NODE2
-# ./hcloud server reboot $NODE3
+./pretty_log.sh "Rebooting nodes"
+./hcloud server reboot $NODE1
+./hcloud server reboot $NODE2
+./hcloud server reboot $NODE3
+sleep 240
 
 chown -R $HOST_UID:$HOST_GID ./output/
 ./pretty_log.sh "------------------------------------------------------------------"
@@ -38,14 +39,18 @@ chown -R $HOST_UID:$HOST_GID ./output/
 if [ "$INSTALL_K8S_DASHBOARD" = "1" ]; then
     ./pretty_log.sh "Command to port-forward dashboard:"
     ./pretty_log.sh "kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443 &"
-    ./pretty_log.sh "You can find token for dashboard inside dashboard_token file in output"
+    ./pretty_log.sh "https://localhost:8443"
+    ./pretty_log.sh "You can find token for dashboard inside output/dashboard_token"
 fi
 if [ "$INSTALL_LONGHORN" = "1" ]; then
     ./pretty_log.sh "You can view Longhorn dashboard by running:"
     ./pretty_log.sh "kubectl port-forward service/longhorn-frontend 8080:80 -n longhorn-system &"
+    ./pretty_log.sh "http://localhost:8080"
     if [ "$INSTALL_VICTORIA_METRICS" = "1" ]; then
         ./pretty_log.sh "You can view Grafana dashboard by running:"
-        ./pretty_log.sh $(cat ./output/port_forward_grafana)
+        ./pretty_log.sh "kubectl port-forward service/vm-grafana 3000:80 -n victoria-metrics &"
+        ./pretty_log.sh "http://localhost:3000"
+        ./pretty_log.sh "Grafana user is admin, password is in output/grafana_pass"
     fi
 fi
 ./pretty_log.sh "Be patient while pods are starting up"
