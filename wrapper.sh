@@ -14,23 +14,21 @@ sed -i s+NODE1+$NODE1+g ./setup_kubeadm.sh &&
 sed -i s+NODE2+$NODE2+g ./setup_kubeadm.sh &&
 sed -i s+NODE3+$NODE3+g ./setup_kubeadm.sh &&
 
-./create.sh 1 $PRIVKEY $NODE1 $INSTALL_K8S_DASHBOARD $INSTALL_EVENT_EXPORTER $INSTALL_LONGHORN $INSTALL_METRICS_SERVER &&
-./create.sh 2 $PRIVKEY $NODE2 &&
-./create.sh 3 $PRIVKEY $NODE3 &&
-./sign_csrs.sh 1 $PRIVKEY &&
+./create.sh 1 $PRIVKEY $NODE1
+./sign_csrs.sh 1 $PRIVKEY
+./create.sh 2 $PRIVKEY $NODE2
+./sign_csrs.sh 1 $PRIVKEY
+./create.sh 3 $PRIVKEY $NODE3
+./sign_csrs.sh 1 $PRIVKEY
+sleep 30
 
+./pretty_log.sh "Provisioning services with kubectl and helm"
+./provision_services.sh
+
+./pretty_log.sh "Rebooting nodes"
 ./hcloud server reboot $NODE1
 ./hcloud server reboot $NODE2
 ./hcloud server reboot $NODE3
-sleep 60
-
-scp -i $PRIVKEY -o StrictHostKeyChecking=no \
-    ./rollout.sh root@$(cat ./output/public_ipv4-1):/root/
-ssh -i $PRIVKEY -o StrictHostKeyChecking=no root@$(cat ./output/public_ipv4-1) \
-    '/root/rollout.sh > /root/rollout.log 2>&1'
-scp -i $PRIVKEY -o StrictHostKeyChecking=no \
-    root@$(cat ./output/public_ipv4-1):/root/rollout.log \
-    ./output/rollout.log
 
 chown -R $HOST_UID:$HOST_GID ./output/
 ./pretty_log.sh "------------------------------------------------------------------"
@@ -45,5 +43,10 @@ fi
 if [ "$INSTALL_LONGHORN" = "1" ]; then
     ./pretty_log.sh "You can view Longhorn dashboard by running:"
     ./pretty_log.sh "kubectl port-forward service/longhorn-frontend 8080:80 -n longhorn-system &"
+    if [ "$INSTALL_VICTORIA_METRICS" = "1" ]; then
+        ./pretty_log.sh "You can view Grafana dashboard by running:"
+        ./pretty_log.sh $(cat ./output/port_forward_grafana)
+    fi
 fi
+./pretty_log.sh "Be patient while pods are starting up"
 ./pretty_log.sh "------------------------------------------------------------------"

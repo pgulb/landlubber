@@ -1,0 +1,39 @@
+vmselect:
+  podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8481"
+  resources: {}
+     limits:
+       cpu: 300m
+       memory: 128Mi
+     requests:
+       cpu: 300m
+       memory: 128Mi
+
+
+vminsert:
+  podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8480"
+  resources: {}
+     limits:
+       cpu: 300m
+       memory: 128Mi
+     requests:
+       cpu: 300m
+       memory: 128Mi
+
+
+vmstorage:
+  podAnnotations:
+      prometheus.io/scrape: "true"
+      prometheus.io/port: "8482"
+  persistentVolume:
+      size: 1Gi
+  resources: {}
+     limits:
+       cpu: 300m
+       memory: 128Mi
+     requests:
+       cpu: 300m
+       memory: 128Mi
