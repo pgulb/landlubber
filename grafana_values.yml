@@ -2,7 +2,7 @@ persistence:
   enabled: true
   size: 1Gi
 
-resources: {}
+resources:
     limits:
       cpu: 300m
       memory: 128Mi
