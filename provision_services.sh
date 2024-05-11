@@ -45,8 +45,8 @@ fi
 if [ "$INSTALL_LONGHORN" = "1" ]; then
     # install Longhorn
     ./pretty_log.sh "Installing Longhorn"
-    kubectl apply -f https://raw.githubusercontent.com/longhorn/longhorn/v1.6.1/deploy/longhorn.yaml
-    sleep 60
+    kubectl apply -f ./longhorn.yaml
+    sleep 120
 fi
 
 if [ "$INSTALL_VICTORIA_METRICS" = "1" ]; then

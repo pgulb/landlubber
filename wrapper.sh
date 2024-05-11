@@ -25,10 +25,10 @@ sleep 30
 ./pretty_log.sh "Provisioning services with kubectl and helm"
 ./provision_services.sh
 
-./pretty_log.sh "Rebooting nodes"
-./hcloud server reboot $NODE1
-./hcloud server reboot $NODE2
-./hcloud server reboot $NODE3
+# ./pretty_log.sh "Rebooting nodes"
+# ./hcloud server reboot $NODE1
+# ./hcloud server reboot $NODE2
+# ./hcloud server reboot $NODE3
 
 chown -R $HOST_UID:$HOST_GID ./output/
 ./pretty_log.sh "------------------------------------------------------------------"
