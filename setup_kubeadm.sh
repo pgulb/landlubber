@@ -2,25 +2,6 @@
 
 # $1 = 0/1 - kubeadm init or join
 
-# disable SELinux and set network forwarding
-# needed for Kubernetes to work correctly
-sudo setenforce 0
-sudo sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
-echo net.ipv4.ip_forward=1 >> /etc/sysctl.conf
-sysctl -p
-
-# add IPs from private hetzner network to hosts file
-cat <<EOF | sudo tee -a /etc/cloud/templates/hosts.redhat.tmpl
-10.10.0.2  NODE1
-10.10.0.3  NODE2
-10.10.0.4  NODE3
-EOF
-cat <<EOF | sudo tee -a /etc/hosts
-10.10.0.2  NODE1
-10.10.0.3  NODE2
-10.10.0.4  NODE3
-EOF
-
 # add kubernetes and docker repo
 cat <<EOF | sudo tee /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
@@ -34,15 +15,7 @@ EOF
 sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
 # install necessary packages
-sudo dnf install -q -y epel-release
-sudo dnf install -q -y dnf-plugins-core htop tar bash-completion git vim jq iscsi-initiator-utils nfs-utils
 sudo dnf install -q -y kubelet kubeadm kubectl docker-ce docker-ce-cli --disableexcludes=kubernetes
-sudo systemctl start iscsid
-sudo systemctl enable iscsid
-curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
-chmod 700 get_helm.sh
-./get_helm.sh
-rm -f ./get_helm.sh
 systemctl enable --now kubelet
 
 # download cri-dockerd
@@ -75,10 +48,6 @@ case $1 in
         echo 'source <(kubectl completion bash)' >> ~/.bashrc
         echo 'export KUBECONFIG=/etc/kubernetes/admin.conf' >> ~/.bashrc
         echo "source <(helm completion bash)" >> ~/.bashrc
-
-        ############################
-        # Rest of installation moved to provision_services.sh
-        ############################
 
         echo "-----[X]-----init complete-----[X]-----"
         exit 0

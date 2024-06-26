@@ -38,11 +38,12 @@ subjects:
   namespace: monitoring
 ---
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
   name: event-exporter
   namespace: monitoring
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: event-exporter

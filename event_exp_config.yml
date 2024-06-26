@@ -12,6 +12,7 @@ data:
   config.yaml: |-
     logLevel: warn
     logFormat: json
+    maxEventAgeSeconds: 599
     metricsNamePrefix: event_exporter_
     route:
       routes:

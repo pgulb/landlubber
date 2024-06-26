@@ -11,28 +11,34 @@ source <(helm completion bash)
 export KUBECONFIG=/landlubber/output/.kubeconfig
 
 # install calico
-./pretty_log.sh "Installing calico CNI"
-kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.3/manifests/tigera-operator.yaml
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.27.3/manifests/custom-resources.yaml -O
-sed -i 's/cidr: 192\.168\.0\.0\/16/cidr: 10.244.0.0\/16/g' custom-resources.yaml
-kubectl create -f custom-resources.yaml
-sleep 100
+if [ "$INSTALL_METHOD" = "kubeadm" ]; then
+    ./pretty_log.sh "Installing calico CNI"
+    kubectl create -f https://raw.githubusercontent.com/projectcalico/calico/v3.27.3/manifests/tigera-operator.yaml
+    curl https://raw.githubusercontent.com/projectcalico/calico/v3.27.3/manifests/custom-resources.yaml -O
+    sed -i 's/cidr: 192\.168\.0\.0\/16/cidr: 10.244.0.0\/16/g' custom-resources.yaml
+    kubectl create -f custom-resources.yaml
+    sleep 100
+fi
 
 # enable pod scheduling
-./pretty_log.sh "Enabling pod scheduling"
-kubectl taint nodes --all node-role.kubernetes.io/control-plane-
-kubectl label nodes --all node.kubernetes.io/exclude-from-external-load-balancers-
-sleep 90
-
-if [ "$INSTALL_METRICS_SERVER" = "1" ]; then
-    # install metrics-server
-    ./pretty_log.sh "Installing metrics-server"
-    kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+if [ "$INSTALL_METHOD" = "kubeadm" ]; then
+    ./pretty_log.sh "Enabling pod scheduling"
+    kubectl taint nodes --all node-role.kubernetes.io/control-plane-
+    kubectl label nodes --all node.kubernetes.io/exclude-from-external-load-balancers-
     sleep 90
 fi
 
+# install metrics-server (k3s comes with metrics server by default)
+if [ "$INSTALL_METRICS_SERVER" = "1" ]; then
+    if [ "$INSTALL_METHOD" = "kubeadm" ]; then
+        ./pretty_log.sh "Installing metrics-server"
+        kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+        sleep 90
+    fi
+fi
+
+# install kubernetes-dashboard
 if [ "$INSTALL_K8S_DASHBOARD" = "1" ]; then
-    # install kubernetes-dashboard
     ./pretty_log.sh "Installing kubernetes-dashboard"
     helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
     helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
@@ -42,15 +48,15 @@ if [ "$INSTALL_K8S_DASHBOARD" = "1" ]; then
     kubectl -n kubernetes-dashboard create token admin-user > ./output/dashboard_token
 fi
 
+# install Longhorn
 if [ "$INSTALL_LONGHORN" = "1" ]; then
-    # install Longhorn
     ./pretty_log.sh "Installing Longhorn"
     kubectl apply -f ./longhorn.yaml
     sleep 120
 fi
 
+# install VictoriaMetrics, only if Longhorn is installed
 if [ "$INSTALL_VICTORIA_METRICS" = "1" ]; then
-    # install VictoriaMetrics, only if Longhorn is installed
     if [ "$INSTALL_LONGHORN" = "1" ]; then
         ./pretty_log.sh "Installing VictoriaMetrics"
         helm repo add vm https://victoriametrics.github.io/helm-charts/
