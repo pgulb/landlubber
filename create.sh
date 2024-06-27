@@ -56,6 +56,7 @@ function kubeadm_init() {
 
 function k3s_init() {
     ./pretty_log.sh "Installing K3S on $3, this may take a while"
+    sed -i s+EXTERNAL_IP+$ip4+g ./k3s_first.sh &&
     scp -i $2 -o StrictHostKeyChecking=no \
     ./k3s_first.sh root@$ip4:/root/ &&
     scp -i $2 -o StrictHostKeyChecking=no \
@@ -68,7 +69,10 @@ function k3s_init() {
 }
 
 function k3s_join() {
+    ip_last_octet=$(($1 + 1))
     ./pretty_log.sh "Installing K3S on $3, this may take a while"
+    sed -i s+EXTERNAL_IP+$ip4+g ./k3s_join.sh &&
+    sed -i s+INTERNAL_IP+10.10.0.$ip_last_octet+g ./k3s_join.sh &&
     scp -i $2 -o StrictHostKeyChecking=no \
     ./k3s_join.sh root@$ip4:/root/ &&
     scp -i $2 -o StrictHostKeyChecking=no \

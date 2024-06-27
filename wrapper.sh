@@ -34,11 +34,14 @@ if [ "$INSTALL_METHOD" = "kubeadm" ]; then
     ./sign_csrs.sh 1 $PRIVKEY
 fi
 sed -i s+JOIN_TOKEN+$(cat ./output/k3s_token)+g ./k3s_join.sh &&
+cp ./k3s_join.sh ./k3s_join.noip
 
 ./create.sh 2 $PRIVKEY $NODE2 $INSTALL_METHOD
 if [ "$INSTALL_METHOD" = "kubeadm" ]; then
     ./sign_csrs.sh 1 $PRIVKEY
 fi
+
+cp ./k3s_join.noip ./k3s_join.sh
 ./create.sh 3 $PRIVKEY $NODE3 $INSTALL_METHOD
 if [ "$INSTALL_METHOD" = "kubeadm" ]; then
     ./sign_csrs.sh 1 $PRIVKEY

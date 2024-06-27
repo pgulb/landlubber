@@ -5,6 +5,8 @@ curl -sfL https://get.k3s.io | sh -s - server \
     --service-cidr=10.43.0.0/16,2001:cafe:42:1::/112 \
     --disable=local-storage \
     --etcd-disable-snapshots \
+    --node-external-ip=EXTERNAL_IP \
+    --flannel-external-ip \
     --cluster-init &&
 
 cat /var/lib/rancher/k3s/server/token | awk -F':' '{print $NF}' > /root/k3s_token
