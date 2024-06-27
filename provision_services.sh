@@ -86,3 +86,11 @@ if [ "$INSTALL_EVENT_EXPORTER" = "1" ]; then
     kubectl apply -f ./event_exporter.yml
     sleep 60
 fi
+
+if [ "$INSTALL_KUBETAIL" = "1" ]; then
+    # install kubetail
+    ./pretty_log.sh "Installing kubetail"
+    kubectl create namespace kubetail
+    kubectl apply -f https://github.com/kubetail-org/kubetail/releases/latest/download/kubetail-clusterauth.yaml
+    sleep 30
+fi

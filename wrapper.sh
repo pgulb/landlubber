@@ -93,6 +93,11 @@ if [ "$INSTALL_LONGHORN" = "1" ]; then
         ./pretty_log.sh "Grafana user is admin, password is in output/grafana_pass"
     fi
 fi
+if [ "$INSTALL_KUBETAIL" = "1" ]; then
+    ./pretty_log.sh "Command to port-forward kubetail:"
+    ./pretty_log.sh "kubectl port-forward -n kubetail svc/kubetail 12345:80 &"
+    ./pretty_log.sh "http://localhost:12345"
+fi
 ./pretty_log.sh
 ./pretty_log.sh "*** BE PATIENT WHILE PODS ARE STARTING UP 🚀 ***"
 ./pretty_log.sh "------------------------------------------------------------------"
