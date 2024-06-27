@@ -56,7 +56,13 @@ sed -i s+127.0.0.1+$(cat ./output/public_ipv4-1)+g ./output/.kubeconfig
 ./hcloud server reboot $NODE1
 ./hcloud server reboot $NODE2
 ./hcloud server reboot $NODE3
-sleep 240
+
+if [ "$INSTALL_METHOD" = "kubeadm" ]; then
+    sleep 120
+fi
+if [ "$INSTALL_METHOD" = "k3s" ]; then
+    sleep 30
+fi
 
 chown -R $HOST_UID:$HOST_GID ./output/
 ./pretty_log.sh "------------------------------------------------------------------"
