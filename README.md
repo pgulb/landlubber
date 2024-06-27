@@ -17,6 +17,7 @@ Optional components to install:
 - VictoriaMetrics with Grafana - https://victoriametrics.com/
 - k8s Dashboard - https://github.com/kubernetes/dashboard
 - event-exporter - https://github.com/resmoio/kubernetes-event-exporter
+- kubetail (web log explorer) - https://github.com/kubetail-org/kubetail
   
 Do not install components if you do not need them, resources are quite limited  
 Instead of dashboard one can use k9s or Monokle  
