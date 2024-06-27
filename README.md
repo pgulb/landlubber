@@ -14,9 +14,12 @@ VMs are created in 3 zones: fsn1, nbg1, hel1 🌐
 Optional components to install:
 - metrics-server - https://github.com/kubernetes-sigs/metrics-server
 - Longhorn (CSI provider) - https://longhorn.io/
-- Victoria Metrics with Grafana - https://victoriametrics.com/
+- VictoriaMetrics with Grafana - https://victoriametrics.com/
 - k8s Dashboard - https://github.com/kubernetes/dashboard
 - event-exporter - https://github.com/resmoio/kubernetes-event-exporter
+  
+Do not install components if you do not need them, resources are quite limited  
+Instead of dashboard one can use k9s or Monokle  
   
 ## usage 🛠️
   
