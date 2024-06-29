@@ -8,6 +8,7 @@ echo 'source <(kubectl completion bash)' >> ~/.bashrc
 echo 'export KUBECONFIG=/landlubber/output/.kubeconfig' >> ~/.bashrc
 echo "source <(helm completion bash)" >> ~/.bashrc
 source <(helm completion bash)
+echo "export KUBECONFIG=/landlubber/output/.kubeconfig" >> ~/.bashrc
 export KUBECONFIG=/landlubber/output/.kubeconfig
 
 # install calico
@@ -36,6 +37,12 @@ if [ "$INSTALL_METRICS_SERVER" = "1" ]; then
         sleep 90
     fi
 fi
+
+# install rancher's system-upgrade-controller
+kubectl create namespace system-upgrade
+kubectl apply -f system-upgrade-controller.yaml
+kubectl apply -f update-crd.yaml
+sleep 10
 
 # install kubernetes-dashboard
 if [ "$INSTALL_K8S_DASHBOARD" = "1" ]; then
