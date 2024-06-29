@@ -64,6 +64,10 @@ spec:
         image: ghcr.io/resmoio/kubernetes-event-exporter:v1.7
         imagePullPolicy: IfNotPresent
         name: event-exporter
+        resources:
+          limits:
+            cpu: 200m
+            memory: 512Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
