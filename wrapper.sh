@@ -18,7 +18,7 @@ sleep 5
 
 ./pretty_log.sh "Running wrapper.sh"
 ./generate_ed25519.sh &&
-./init_hcloud.sh $PUBKEY $HCLOUD_TOKEN 1 &&
+./init_hcloud.sh $PUBKEY $HCLOUD_TOKEN 1 $HCLOUD_NETWORK &&
 
 sed -i s/KUBE_VER/$KUBE_VER/g ./setup_kubeadm.sh &&
 sed -i s/CRI_DOCKERD_VER/$CRI_DOCKERD_VER/g ./setup_kubeadm.sh &&
@@ -29,20 +29,20 @@ sed -i s+NODE2+$NODE2+g ./initial_packages.sh &&
 sed -i s+NODE3+$NODE3+g ./initial_packages.sh &&
 sed -i s+NODE1+$NODE1+g ./k3s_join.sh &&
 
-./create.sh 1 $PRIVKEY $NODE1 $INSTALL_METHOD
+./create.sh 1 $PRIVKEY $NODE1 $INSTALL_METHOD $HCLOUD_NETWORK
 if [ "$INSTALL_METHOD" = "kubeadm" ]; then
     ./sign_csrs.sh 1 $PRIVKEY
 fi
 sed -i s+JOIN_TOKEN+$(cat ./output/k3s_token)+g ./k3s_join.sh &&
 cp ./k3s_join.sh ./k3s_join.noip
 
-./create.sh 2 $PRIVKEY $NODE2 $INSTALL_METHOD
+./create.sh 2 $PRIVKEY $NODE2 $INSTALL_METHOD $HCLOUD_NETWORK
 if [ "$INSTALL_METHOD" = "kubeadm" ]; then
     ./sign_csrs.sh 1 $PRIVKEY
 fi
 
 cp ./k3s_join.noip ./k3s_join.sh
-./create.sh 3 $PRIVKEY $NODE3 $INSTALL_METHOD
+./create.sh 3 $PRIVKEY $NODE3 $INSTALL_METHOD $HCLOUD_NETWORK
 if [ "$INSTALL_METHOD" = "kubeadm" ]; then
     ./sign_csrs.sh 1 $PRIVKEY
 fi

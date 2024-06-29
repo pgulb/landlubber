@@ -18,4 +18,4 @@ rm -rf ./output/public_ipv4*
 ./hcloud server delete $NODE1
 ./hcloud server delete $NODE2
 ./hcloud server delete $NODE3
-./hcloud network delete landlubber
+./hcloud network delete $HCLOUD_NETWORK

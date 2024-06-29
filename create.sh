@@ -4,6 +4,7 @@
 # $2 = $PRIVKEY
 # $3 = node name
 # $4 = install method
+# $5 = HCLOUD_NETWORK
 
 ip4=""
 ./pretty_log.sh "Running create.sh"
@@ -23,7 +24,7 @@ function create_vm() {
 
     ./pretty_log.sh "Creating VM $3 in $REGION"
     mkdir -p ./output &&
-    ./hcloud server create --network landlubber --location $REGION --ssh-key landlubber-key \
+    ./hcloud server create --network $5 --location $REGION --ssh-key landlubber-key \
     --name "$3" --type cax11 --image rocky-9 -o json \
     | jq -r '.server.public_net.ipv4.ip' | tr -d "\n" > ./output/public_ipv4-$1 &&
     sleep 30
