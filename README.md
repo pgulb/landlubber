@@ -19,6 +19,8 @@ Optional components to install:
 - event-exporter - https://github.com/resmoio/kubernetes-event-exporter
 - kubetail (web log explorer) - https://github.com/kubetail-org/kubetail
   
+k3s deployment comes with Rancher system-upgrade-controller  
+  
 Do not install components if you do not need them, resources are quite limited  
 Instead of dashboard one can use k9s or Monokle  
   
@@ -35,15 +37,26 @@ directory which is added with volume in commands below
 Attach ./output dir to acquire generated SSH key, logs, kubeconfig file etc
   
 ```shell
-docker run --rm -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output ghcr.io/pgulb/landlubber:main
+docker run --rm -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output ghcr.io/pgulb/landlubber:latest
 ```
   
 ## connecting ⚡
   
-You can connect to created node 1 or 2 or 3 by using  
+You can connect to created nodes by ssh
+example for node #1:  
   
 ```shell
-docker run --rm -it -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output ghcr.io/pgulb/landlubber:main ./connect.sh 1|2|3
+docker run --rm -it -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output ghcr.io/pgulb/landlubber:latest ./connect.sh 1
+```
+  
+## upgrade ⚡
+  
+Run this command to upgrade k3s cluster  
+Run without version specified to show newest release avalaible  
+Consider k8s version skew - https://kubernetes.io/releases/version-skew-policy/  
+  
+```shell
+docker run --rm -it -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output ghcr.io/pgulb/landlubber:latest ./update_cluster.sh <k3s_version>
 ```
   
 ## cleanup 🧹
@@ -51,6 +64,6 @@ docker run --rm -it -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output
 To remove existing VMs and clean output files, run  
   
 ```shell
-docker run --rm -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output ghcr.io/pgulb/landlubber:main ./remove.sh
+docker run --rm -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output ghcr.io/pgulb/landlubber:latest ./remove.sh
 ```
   
