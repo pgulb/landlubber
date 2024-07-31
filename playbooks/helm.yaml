@@ -1,0 +1,17 @@
+---
+- name: Install Helm
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Download Helm script
+      ansible.builtin.get_url:
+        dest: /root/get_helm.sh
+        mode: '700'
+        url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+    - name: Install Helm
+      ansible.builtin.command: /bin/sh /root/get_helm.sh
+      changed_when: false
+    - name: Remove script file
+      ansible.builtin.file:
+        path: /root/get_helm.sh
+        state: absent

@@ -1,0 +1,20 @@
+---
+- name: Install packages
+  hosts: all
+  gather_facts: true
+  tasks:
+    - name: Install epel
+      ansible.builtin.dnf:
+        name: epel-release
+    - name: Install rest of packages
+      ansible.builtin.dnf:
+        name:
+          - bash-completion
+          - dnf-plugins-core
+          - git
+          - htop
+          - iscsi-initiator-utils
+          - jq
+          - nfs-utils
+          - tar
+          - vim
