@@ -9,3 +9,4 @@ Dockerfile
 .dockerignore
 .git/
 .github/
+ansible_node_docker/
