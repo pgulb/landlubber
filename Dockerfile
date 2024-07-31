@@ -2,8 +2,10 @@ FROM ubuntu:noble-20240407.1
 
 LABEL org.opencontainers.image.description="See https://github.com/pgulb/landlubber for usage."
 
-RUN apt-get update && apt-get install openssh-client ca-certificates jq curl -y && \
+RUN apt-get update && apt-get install openssh-client ca-certificates jq curl \
+python3 python3-pip -y && \
 rm -rf /var/lib/apt/lists/*
+RUN pip install ansible --break-system-packages --no-cache-dir
 RUN mkdir -p /landlubber
 WORKDIR /landlubber
 RUN curl -LO https://dl.k8s.io/release/v1.30.0/bin/linux/amd64/kubectl \
