@@ -23,8 +23,6 @@ jobs:
                 volumes:
                     - /sys/fs/cgroup:/sys/fs/cgroup:rw
                 options: --privileged --cgroupns=host
-                # ports:
-                #     - 2222:22
         steps:
             - name: install sshpass and ping
               run: apt-get update; apt-get install sshpass iputils-ping -y
