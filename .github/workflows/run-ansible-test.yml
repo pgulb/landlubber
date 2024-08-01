@@ -23,5 +23,7 @@ jobs:
                 ports:
                     - 2222:22
         steps:
+            - name: install sshpass
+              run: apt-get update; apt-get install sshpass -y
             - name: disable selinux
               run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/selinux.yaml
