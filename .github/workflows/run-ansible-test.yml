@@ -20,5 +20,7 @@ jobs:
                 ports:
                     - 2222:22
         steps:
+            - name: verify file existence
+              run: ls -Rltr
             - name: disable selinux
               run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/selinux.yaml
