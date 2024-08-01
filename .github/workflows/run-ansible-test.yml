@@ -1,0 +1,24 @@
+name: test-playbooks
+
+on:
+    workflow_run:
+        workflows:
+            - Docker
+        branches:
+            - main
+        types:
+            - completed
+
+jobs:
+    test-playbooks:
+        name: test-playbooks
+        runs-on: ubuntu-latest
+        container: ghcr.io/pgulb/landlubber:main
+        services:
+            ansible-node:
+                image: ghcr.io/pgulb/rocky-ansible-tester:master
+                ports:
+                    - 2222:22
+        steps:
+            - name: disable selinux
+              run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/selinux.yaml
