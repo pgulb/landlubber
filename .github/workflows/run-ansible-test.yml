@@ -30,3 +30,11 @@ jobs:
               run: apt-get update; apt-get install sshpass -y
             - name: test disabling selinux
               run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/selinux.yaml
+            - name: test adding dns settings
+              run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/dns.yaml
+            - name: test installing initial packages
+              run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/initial_packages.yaml
+            - name: test setting up initial services
+              run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/initial_services.yaml
+            - name: test installing helm
+              run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/helm.yaml
