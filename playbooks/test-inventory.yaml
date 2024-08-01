@@ -1,7 +1,7 @@
 rocky_hosts:
   hosts:
     rocky:
-      ansible_host: 127.0.0.1
+      ansible_host: ansible-node
       ansible_port: 2222
       ansible_user: root
       ansible_password: 123
