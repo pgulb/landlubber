@@ -1,3 +1,0 @@
-Include /etc/ssh/sshd_config.d/*.conf
-PermitRootLogin yes
-AuthorizedKeysFile	.ssh/authorized_keys

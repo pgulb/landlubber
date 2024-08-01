@@ -10,3 +10,4 @@ Dockerfile
 .git/
 .github/
 ansible_node_docker/
+.vscode/
