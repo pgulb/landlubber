@@ -23,11 +23,13 @@ jobs:
                 volumes:
                     - /sys/fs/cgroup:/sys/fs/cgroup:rw
                 options: --privileged --cgroupns=host
-                ports:
-                    - 2222:22
+                # ports:
+                #     - 2222:22
         steps:
-            - name: install sshpass
-              run: apt-get update; apt-get install sshpass -y
+            - name: install sshpass and ping
+              run: apt-get update; apt-get install sshpass iputils-ping -y
+            - name: ping the node
+              run: ping -4 -c 1 ansible-node
             - name: test disabling selinux
               run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/selinux.yaml
             - name: test adding dns settings
