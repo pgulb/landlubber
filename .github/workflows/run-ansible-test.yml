@@ -20,10 +20,13 @@ jobs:
         services:
             ansible-node:
                 image: ghcr.io/pgulb/rocky-ansible-tester:master
+                volumes:
+                    - /sys/fs/cgroup:/sys/fs/cgroup:rw
+                options: --privileged --cgroupns=host
                 ports:
                     - 2222:22
         steps:
             - name: install sshpass
               run: apt-get update; apt-get install sshpass -y
-            - name: disable selinux
+            - name: test disabling selinux
               run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/selinux.yaml
