@@ -13,6 +13,9 @@ jobs:
     test-playbooks:
         name: test-playbooks
         runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: /landlubber
         container: ghcr.io/pgulb/landlubber:main
         services:
             ansible-node:
@@ -20,7 +23,5 @@ jobs:
                 ports:
                     - 2222:22
         steps:
-            - name: verify file existence
-              run: ls -Rltr; pwd; cd /landlubber; ls -Rltr
             - name: disable selinux
               run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/selinux.yaml
