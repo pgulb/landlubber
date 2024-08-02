@@ -7,8 +7,8 @@ rocky_hosts:
       ansible_password: 123
       ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
   vars:
-    NODE1: kube-node-1
-    NODE2: kube-node-2
-    NODE3: kube-node-3
+    node_name_1: kube-node-1
+    node_name_2: kube-node-2
+    node_name_3: kube-node-3
     # /etc/hosts is tricky in docker containers
     etc_hosts: /etc/hosts2
