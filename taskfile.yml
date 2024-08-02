@@ -5,7 +5,8 @@ version: '3'
 tasks:
   chmod:
     cmds:
-      - chmod -R 777 ./output
+      - chmod 777 ./output
+      - chmod 777 ./output/*.yml
   ssh-keys:
 
     cmds:
@@ -27,6 +28,11 @@ tasks:
       - task: ansible-provision-network
       - task: ansible-key_to_hcloud
       - task: ansible-provision-vms
+      - task: ansible-selinux
+      - task: ansible-dns
+      - task: ansible-initial-packages
+      - task: ansible-initial-services
+      - task: ansible-helm
 
   ansible-provision-network:
     cmds:
@@ -39,3 +45,23 @@ tasks:
   ansible-provision-vms:
     cmds:
       - ansible-playbook -i ./output/inventory.yml ./playbooks/provision_vms.yaml
+
+  ansible-selinux:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/selinux.yaml
+
+  ansible-dns:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/dns.yaml
+
+  ansible-initial-packages:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/initial_packages.yaml
+
+  ansible-initial-services:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/initial_services.yaml
+
+  ansible-helm:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/helm.yaml
