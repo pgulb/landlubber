@@ -67,3 +67,24 @@
         regexp: "NODEIP3"
         replace: "'{{ output_3.hcloud_server.ipv4_address }}'"
         backup: false
+    - name: Wait for first VM to be online
+      ansible.builtin.wait_for:
+        host: "{{ output_1.hcloud_server.ipv4_address }}"
+        port: 22
+        sleep: 5
+        timeout: 300
+      delegate_to: localhost
+    - name: Wait for second VM to be online
+      ansible.builtin.wait_for:
+        host: "{{ output_2.hcloud_server.ipv4_address }}"
+        port: 22
+        sleep: 5
+        timeout: 300
+      delegate_to: localhost
+    - name: Wait for third VM to be online
+      ansible.builtin.wait_for:
+        host: "{{ output_3.hcloud_server.ipv4_address }}"
+        port: 22
+        sleep: 5
+        timeout: 300
+      delegate_to: localhost
