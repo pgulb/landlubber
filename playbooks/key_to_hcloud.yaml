@@ -3,6 +3,12 @@
   hosts: node1
   gather_facts: false
   tasks:
+    - name: Clear sshkey in hcloud
+      delegate_to: localhost
+      hetzner.hcloud.ssh_key:
+        api_token: "{{ hcloud_token }}"
+        name: landlubber-key
+        state: absent
     - name: Upload public key to hcloud
       delegate_to: localhost
       hetzner.hcloud.ssh_key:
