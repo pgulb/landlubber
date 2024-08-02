@@ -1,0 +1,23 @@
+---
+- name: Provision network on Hetzner Cloud
+  hosts: node1
+  gather_facts: false
+  tasks:
+    - name: Install python3-hcloud on ansible host
+      delegate_to: localhost
+      ansible.builtin.apt:
+        name: python3-hcloud
+    - name: Create network for hetzner VMs
+      delegate_to: localhost
+      hetzner.hcloud.network:
+        api_token: "{{ hcloud_token }}"
+        name: "{{ hcloud_network }}"
+        ip_range: 10.10.0.0/16
+    - name: Create subnet in hetzner network
+      delegate_to: localhost
+      hetzner.hcloud.subnetwork:
+        api_token: "{{ hcloud_token }}"
+        network: "{{ hcloud_network }}"
+        type: server
+        ip_range: 10.10.0.0/16
+        network_zone: "{{ hcloud_network_zone }}"

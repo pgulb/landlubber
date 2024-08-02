@@ -1,0 +1,42 @@
+nodes:
+  hosts:
+    node1:
+      # IPs are assigned automatically after provisoning
+      ansible_host: NODEIP1
+      ansible_port: 22
+      ansible_user: root
+      ansible_ssh_private_key_file: ./output/id_ed25519
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+    node2:
+      ansible_host: NODEIP2
+      ansible_port: 22
+      ansible_user: root
+      ansible_ssh_private_key_file: ./output/id_ed25519
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+    node3:
+      ansible_host: NODEIP3
+      ansible_port: 22
+      ansible_user: root
+      ansible_ssh_private_key_file: ./output/id_ed25519
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+
+  vars:
+    # change node names to suite your needs
+    node_name_1: kube-node-1
+    node_name_2: kube-node-2
+    node_name_3: kube-node-3
+    # change regions according to your location
+    hcloud_region_1: fsn1
+    hcloud_region_2: nbg1
+    hcloud_region_3: hel1
+    # changing network name and zone is optional
+    # you can use other networks for other clusters
+    # zone should be compatible with regions
+    hcloud_network: landlubber
+    hcloud_network_zone: eu-central
+    #
+    # write your hcloud token below
+    # this is REQUIRED for landlubber to work
+    #
+    hcloud_token: WRITE_TOKEN_HERE
+    etc_hosts: /etc/hosts

@@ -1,0 +1,11 @@
+---
+- name: Upload public key to Hetzner Cloud
+  hosts: node1
+  gather_facts: false
+  tasks:
+    - name: Upload public key to hcloud
+      delegate_to: localhost
+      hetzner.hcloud.ssh_key:
+        api_token: "{{ hcloud_token }}"
+        name: landlubber-key
+        public_key: "{{ lookup('ansible.builtin.file', '../output/id_ed25519.pub') }}"

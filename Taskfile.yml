@@ -1,0 +1,80 @@
+# taskfile for end user (outside container)
+
+version: '3'
+
+tasks:
+  default:
+    desc: this task lists all other tasks avalaible for landlubber
+    cmds:
+      - echo "All tasks need docker to be running"
+      - echo "Below you will find list of all tasks available"
+      - echo "To run a task use 'task <task-name>'"
+      - echo "Start with running 'task inventory'"
+      - echo ""
+      - task --list
+    silent: true
+
+  inventory:
+    desc: |
+      this task copies inventory.yml to ./output,
+      you can tailor it to your needs,
+      to use landlubber you need to add your hcloud token to it
+    env:
+      IMAGE: "{{.IMAGE}}"
+    cmds:
+    - |
+      mkdir -p ./output
+      docker run --rm \
+      -v ./output:/landlubber/output \
+      {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
+      task inventory
+      echo "after filling inventory file, run 'task run' to start landlubber"
+
+  run:
+    desc: |
+      this task runs landlubber in a container,
+      before using this task, use task 'inventory',
+      write your hcloud token in ./output/inventory.yml,
+      and replace any values you would want to change
+    env:
+      IMAGE: "{{.IMAGE}}"
+    cmds:
+    - |
+      mkdir -p ./output
+      docker run --rm \
+      -v ./output:/landlubber/output \
+      {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
+      task run
+    preconditions:
+      - sh: |
+          count=$(grep -o "NODEIP" ./output/inventory.yml | wc -l)
+          if [ "$count" -gt 0 ]; then
+            exit 0
+          else
+            exit 1
+          fi
+        msg: "file ./output/inventory.yml needs NOT to be filled with IPs - run 'task inventory' first"
+
+  inventory-dev:
+    desc: 'DEVELOPMENT: get inventory file'
+    cmds:
+     - task: inventory
+       vars:
+        IMAGE: ll:1
+
+  run-dev:
+    desc: 'DEVELOPMENT: run landlubber with local image (ll:1)'
+    cmds:
+     - task: run
+       vars:
+        IMAGE: ll:1
+
+  build-dev:
+    desc: 'DEVELOPMENT: build image locally as ll:1'
+    cmds:
+     - docker build -t ll:1 .
+
+  sh-dev:
+    desc: 'DEVELOPMENT: run container interactively'
+    cmds:
+     - docker run --rm -v ./output:/landlubber/output -it ll:1 bash

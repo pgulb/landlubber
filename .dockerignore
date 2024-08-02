@@ -11,3 +11,4 @@ Dockerfile
 .github/
 ansible_node_docker/
 .vscode/
+Taskfile.yml

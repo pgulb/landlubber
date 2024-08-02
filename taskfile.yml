@@ -1,0 +1,41 @@
+# internal taskfile
+
+version: '3'
+
+tasks:
+  chmod:
+    cmds:
+      - chmod -R 777 ./output
+  ssh-keys:
+
+    cmds:
+      - rm -rf ./output/id_ed25519*
+      - ssh-keygen -t ed25519 -f ./output/id_ed25519 -N "" -C "landlubber"
+      - task: chmod
+
+  inventory:
+    cmds:
+      - cp ./playbooks/default-inventory.yml ./output/inventory.yml
+      - echo 'review ./output/inventory.yml file'
+      - echo 'write your hcloud token in it'
+      - task: chmod
+
+  run:
+    cmds:
+      - echo 'landlubber running'
+      - task: ssh-keys
+      - task: ansible-provision-network
+      - task: ansible-key_to_hcloud
+      - task: ansible-provision-vms
+
+  ansible-provision-network:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/provision_network.yaml
+
+  ansible-key_to_hcloud:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/key_to_hcloud.yaml
+
+  ansible-provision-vms:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/provision_vms.yaml
