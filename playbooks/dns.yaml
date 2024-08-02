@@ -7,9 +7,9 @@
       ansible.builtin.blockinfile:
         path: /etc/cloud/templates/hosts.redhat.tmpl
         block: |
-          10.10.0.2  {{ NODE1 }}
-          10.10.0.3  {{ NODE2 }}
-          10.10.0.4  {{ NODE3 }}
+          10.10.0.2  {{ node_name_1 }}
+          10.10.0.3  {{ node_name_2 }}
+          10.10.0.4  {{ node_name_3 }}
         create: true
         mode: '600'
     - name: Add private IPs to hosts file
@@ -17,8 +17,8 @@
         # using another path when testing on docker container
         path: "{{ etc_hosts }}"
         block: |
-          10.10.0.2  {{ NODE1 }}
-          10.10.0.3  {{ NODE2 }}
-          10.10.0.4  {{ NODE3 }}
+          10.10.0.2  {{ node_name_1 }}
+          10.10.0.3  {{ node_name_2 }}
+          10.10.0.4  {{ node_name_3 }}
         create: true
         mode: '600'
