@@ -14,14 +14,14 @@ tasks:
       - ssh-keygen -t ed25519 -f ./output/id_ed25519 -N "" -C "landlubber"
       - task: chmod
 
-  inventory:
+  init:
     cmds:
       - cp ./playbooks/default-inventory.yml ./output/inventory.yml
       - echo 'review ./output/inventory.yml file'
       - echo 'write your hcloud token in it'
       - task: chmod
 
-  run:
+  deploy:
     cmds:
       - echo 'landlubber running'
       - task: ssh-keys

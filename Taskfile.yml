@@ -9,12 +9,12 @@ tasks:
       - echo "All tasks need docker to be running"
       - echo "Below you will find list of all tasks available"
       - echo "To run a task use 'task <task-name>'"
-      - echo "Start with running 'task inventory'"
+      - echo "Start with running 'task init'"
       - echo ""
       - task --list
     silent: true
 
-  inventory:
+  init:
     desc: |
       this task copies inventory.yml to ./output,
       you can tailor it to your needs,
@@ -27,13 +27,13 @@ tasks:
       docker run --rm \
       -v ./output:/landlubber/output \
       {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
-      task inventory
-      echo "after filling inventory file, run 'task run' to start landlubber"
+      task init
+      echo "after filling inventory file, run 'task deploy' to start landlubber"
 
-  run:
+  deploy:
     desc: |
       this task runs landlubber in a container,
-      before using this task, use task 'inventory',
+      before using this task, use 'task init',
       write your hcloud token in ./output/inventory.yml,
       and replace any values you would want to change
     env:
@@ -44,7 +44,7 @@ tasks:
       docker run --rm \
       -v ./output:/landlubber/output \
       {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
-      task run
+      task deploy
     preconditions:
       - sh: |
           count=$(grep -o "NODEIP" ./output/inventory.yml | wc -l)
@@ -53,19 +53,19 @@ tasks:
           else
             exit 1
           fi
-        msg: "file ./output/inventory.yml needs NOT to be filled with IPs - run 'task inventory' first"
+        msg: "file ./output/inventory.yml needs NOT to be filled with IPs - run 'task init' first"
 
-  inventory-dev:
+  init-dev:
     desc: 'DEVELOPMENT: get inventory file'
     cmds:
-     - task: inventory
+     - task: init
        vars:
         IMAGE: ll:1
 
-  run-dev:
+  deploy-dev:
     desc: 'DEVELOPMENT: run landlubber with local image (ll:1)'
     cmds:
-     - task: run
+     - task: deploy
        vars:
         IMAGE: ll:1
 
