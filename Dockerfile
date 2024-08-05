@@ -13,12 +13,10 @@ WORKDIR /landlubber
 RUN mkdir -p /etc/ansible && echo '[defaults]\n' > /etc/ansible/ansible.cfg && \
 echo 'stdout_callback = yaml' >> /etc/ansible/ansible.cfg
 RUN sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d
-RUN curl -LO https://dl.k8s.io/release/v1.30.0/bin/linux/amd64/kubectl \
-&& chmod +x kubectl && mv kubectl /usr/local/bin
+ADD ./scripts/get_kubectl.sh .
+RUN ./get_kubectl.sh && rm -f ./get_kubectl.sh
 RUN curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 \
 && chmod +x get_helm.sh && ./get_helm.sh && rm -f ./get_helm.sh
 COPY . .
-ADD https://github.com/hetznercloud/cli/releases/download/v1.43.0/hcloud-linux-amd64.tar.gz .
-RUN tar -xf hcloud-linux-amd64.tar.gz && rm hcloud-linux-amd64.tar.gz README.md LICENSE
 
 CMD [ "./wrapper.sh" ]
