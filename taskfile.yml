@@ -33,6 +33,14 @@ tasks:
       - task: ansible-initial-packages
       - task: ansible-initial-services
       - task: ansible-helm
+      - task: ansible-k3s-first
+      - task: ansible-k3s-join
+      - task: kubectl-longhorn
+      - task: kubectl-victoria-metrics
+      - task: kubectl-k8s-dashboard
+      - task: kubectl-event-exporter
+      - task: kubectl-kubetail
+      - task: post-install-info
 
   ansible-provision-network:
     cmds:
@@ -65,3 +73,120 @@ tasks:
   ansible-helm:
     cmds:
       - ansible-playbook -i ./output/inventory.yml ./playbooks/helm.yaml
+
+  ansible-k3s-first:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/k3s_first.yaml
+
+  ansible-k3s-join:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/k3s_join.yaml
+
+  kubectl-longhorn:
+    cmds:
+      - |
+        if [ $(yq .nodes.vars.install_longhorn ./output/inventory.yml) = "true" ]; then
+          echo "installing longhorn..."
+          kubectl apply -f ./manifests/longhorn.yaml
+          kubectl wait pod --all --for=condition=Ready --namespace=longhorn-system --timeout=600s
+        fi
+
+  kubectl-victoria-metrics:
+    cmds:
+      - |
+        if [ $(yq .nodes.vars.install_victoria_metrics ./output/inventory.yml) = "true" ]; then
+          if [ $(yq .nodes.vars.install_longhorn ./output/inventory.yml) = "true" ]; then
+            echo "installing victoria_metrics..."
+            helm repo add vm https://victoriametrics.github.io/helm-charts/
+            helm repo update
+            helm install vmcluster vm/victoria-metrics-cluster \
+            -f ./manifests/victoria_values.yml --create-namespace -n victoria-metrics
+            helm install vmagent vm/victoria-metrics-agent \
+            -f ./manifests/vmagent_values.yml -n victoria-metrics
+            kubectl wait pod --all --for=condition=Ready --namespace=victoria-metrics --timeout=600s
+
+            helm repo add grafana https://grafana.github.io/helm-charts
+            helm repo update
+            helm install vm-grafana grafana/grafana -f ./manifests/grafana_values.yml \
+            -n victoria-metrics
+            kubectl wait pod --all --for=condition=Ready --namespace=victoria-metrics --timeout=600s
+
+            kubectl get secret --namespace victoria-metrics vm-grafana \
+            -o jsonpath="{.data.admin-password}" | base64 --decode > ./output/grafana_pass
+          else
+            echo "skipping victoria_metrics installation, longhorn is not installed"
+          fi
+        fi
+
+  kubectl-k8s-dashboard:
+    cmds:
+      - |
+        if [ $(yq .nodes.vars.install_k8s_dashboard ./output/inventory.yml) = "true" ]; then
+          echo "installing kubernetes-dashboard..."
+          helm repo add kubernetes-dashboard https://kubernetes.github.io/dashboard/
+          helm upgrade --install kubernetes-dashboard kubernetes-dashboard/kubernetes-dashboard \
+          --create-namespace --namespace kubernetes-dashboard
+          kubectl apply -f ./manifests/dashboard_user.yml
+          kubectl wait pod --all --for=condition=Ready --namespace=kubernetes-dashboard --timeout=600s
+          kubectl -n kubernetes-dashboard create token admin-user > ./output/dashboard_token
+        fi
+
+  kubectl-event-exporter:
+    cmds:
+      - |
+        if [ $(yq .nodes.vars.install_event_exporter ./output/inventory.yml) = "true" ]; then
+          echo "installing event_exporter..."
+          kubectl apply -f ./manifests/event_exp_config.yml
+          kubectl apply -f ./manifests/event_exporter.yml
+          kubectl wait pod --all --for=condition=Ready --namespace=monitoring --timeout=600s
+        fi
+
+  kubectl-kubetail:
+    cmds:
+      - |
+        if [ $(yq .nodes.vars.install_kubetail ./output/inventory.yml) = "true" ]; then
+          echo "installing kubetail..."
+          kubectl create namespace kubetail
+          kubectl apply -f https://github.com/kubetail-org/kubetail/releases/latest/download/kubetail-clusterauth.yaml
+          kubectl wait pod --all --for=condition=Ready --namespace=kubetail --timeout=600s
+        fi
+
+  post-install-info:
+    cmds:
+    - echo "DONE"
+    - echo '---'
+    - echo ".kubeconfig file is in ./output/ directory"
+    - echo ".kubeconfig points to IP of node 1"
+    - echo "You can change it to point to IP of node 2 or 3"
+    - echo "IPs of nodes are in ./output/inventory.yml"
+    - |
+        if [ $(yq .nodes.vars.install_k8s_dashboard ./output/inventory.yml) = "true" ]; then
+            echo '---'
+            echo "Command to port-forward dashboard:"
+            echo "kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443 &"
+            echo "https://localhost:8443"
+            echo "You can find token for dashboard inside ./output/dashboard_token"
+        fi
+    - |
+        if [ $(yq .nodes.vars.install_longhorn ./output/inventory.yml) = "true" ]; then
+            echo '---'
+            echo "You can view Longhorn dashboard by running:"
+            echo "kubectl port-forward service/longhorn-frontend 8080:80 -n longhorn-system &"
+            echo "http://localhost:8080"
+            if [ $(yq .nodes.vars.install_victoria_metrics ./output/inventory.yml) = "true" ]; then
+                echo "You can view Grafana dashboard by running:"
+                echo "kubectl port-forward service/vm-grafana 3000:80 -n victoria-metrics &"
+                echo "http://localhost:3000"
+                echo "Grafana user is admin, password is in output/grafana_pass"
+            fi
+        fi
+    - |
+        if [ $(yq .nodes.vars.install_kubetail ./output/inventory.yml) = "true" ]; then
+            echo '---'
+            echo "Command to port-forward kubetail:"
+            echo "kubectl port-forward -n kubetail svc/kubetail 12345:80 &"
+            echo "http://localhost:12345"
+        fi
+    - echo
+    - echo "*** BE PATIENT WHILE PODS ARE STARTING UP 🚀 ***"  
+    silent: true
