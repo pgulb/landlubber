@@ -1,0 +1,24 @@
+---
+- name: Join rest of nodes to k3s cluster
+  hosts: node2,node3
+  gather_facts: false
+  tasks:
+    - name: Create k3s join scripts for nodes
+      delegate_to: localhost
+      ansible.builtin.copy:
+        src: ../scripts/k3s_join.sh.noip
+        dest: "../scripts/k3s_join.sh.{{ ansible_host }}"
+        owner: root
+        group: root
+        mode: '0700'
+    - name: Add IPs to join scripts
+      delegate_to: localhost
+      ansible.builtin.replace:
+        path: "../scripts/k3s_join.sh.{{ ansible_host }}"
+        regexp: "EXTERNAL_IP"
+        replace: "'{{ ansible_host }}'"
+        backup: false
+    - name: Run k3s join script
+      ansible.builtin.script:
+        cmd: "../scripts/k3s_join.sh.{{ ansible_host }}"
+        creates: /usr/local/bin/k3s

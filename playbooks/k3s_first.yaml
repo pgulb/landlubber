@@ -1,0 +1,30 @@
+---
+- name: Setup k3s on first node (bootstrap cluster)
+  hosts: node1
+  gather_facts: false
+  tasks:
+    - name: Template k3s_first script
+      delegate_to: localhost
+      ansible.builtin.template:
+        src: ../scripts/k3s_first.j2
+        dest: ../scripts/k3s_first.sh
+        owner: root
+        group: root
+        mode: '0700'
+    - name: Run k3s install script on first node
+      ansible.builtin.script:
+        cmd: ../scripts/k3s_first.sh
+        creates: /usr/local/bin/k3s
+    - name: Download k3s token file
+      ansible.builtin.fetch:
+        src: /root/k3s_token
+        dest: /landlubber/output/k3s_token
+        flat: true
+    - name: Template k3s_join script
+      delegate_to: localhost
+      ansible.builtin.template:
+        src: ../scripts/k3s_join.j2
+        dest: ../scripts/k3s_join.sh.noip  # need to also add target IP
+        owner: root
+        group: root
+        mode: '0700'
