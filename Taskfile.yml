@@ -6,12 +6,12 @@ tasks:
   default:
     desc: this task lists all other tasks avalaible for landlubber
     cmds:
-      - echo "All tasks need docker to be running"
+      - echo "All cluster-creating tasks need docker to be running"
       - echo "Below you will find list of all tasks available"
       - echo "To run a task use 'task <task-name>'"
       - echo "Start with running 'task init'"
       - echo ""
-      - task --list
+      - task --list --sort none
     silent: true
 
   init:
@@ -55,6 +55,69 @@ tasks:
           fi
         msg: "file ./output/inventory.yml needs NOT to be filled with IPs - run 'task init' first"
 
+  apps-info:
+    desc: |
+      Run this after running 'task deploy' if you need to see again
+      how to interact with provisioned applications
+    env:
+      IMAGE: "{{.IMAGE}}"
+    cmds:
+    - |
+      mkdir -p ./output
+      docker run --rm \
+      -v ./output:/landlubber/output \
+      {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
+      task post-install-info
+    silent: true
+
+  install-kubeconfig:
+    desc: |
+      Run this after running 'task deploy' to copy .kubeconfig to ~/.kube/config,
+      WARNING: this will overwrite existing ~/.kube/config
+    prompt: 'WARNING: this will overwrite existing ~/.kube/config - Do you want to continue?'
+    cmds:
+    - |
+      mkdir -p ./output
+      cp ./output/.kubeconfig ~/.kube/config
+
+  kill-pw:
+    desc: |
+      Run to kill all kubectl processes to stop any ongoing port-forwarding
+    cmds:
+    - killall kubectl
+
+  grafana:
+    desc: |
+      Run to port-forward grafana to localhost:3000 and open it in your browser
+    cmds:
+    - kubectl port-forward service/vm-grafana 3000:80 -n victoria-metrics &
+    - sleep 2
+    - xdg-open 'http://localhost:3000'
+
+  dashboard:
+    desc: |
+      Run to port-forward dashboard to https://localhost:8443 and open it in your browser
+    cmds:
+    - kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443 &
+    - sleep 2
+    - xdg-open 'https://localhost:8443'
+
+  longhorn:
+    desc: |
+      Run to port-forward longhorn UI to http://localhost:8080 and open it in your browser
+    cmds:
+    - kubectl port-forward service/longhorn-frontend 8080:80 -n longhorn-system &
+    - sleep 2
+    - xdg-open 'http://localhost:8080'
+
+  kubetail:
+    desc: |
+      Run to port-forward kubetail to http://localhost:12345 and open it in your browser
+    cmds:
+    - kubectl port-forward -n kubetail svc/kubetail 12345:80 &
+    - sleep 2
+    - xdg-open 'http://localhost:12345'
+
   init-dev:
     desc: 'DEVELOPMENT: get inventory file'
     cmds:
@@ -78,3 +141,11 @@ tasks:
     desc: 'DEVELOPMENT: run container interactively'
     cmds:
      - docker run --rm -v ./output:/landlubber/output -it ll:1 bash
+
+  apps-info-dev:
+    desc: 'DEVELOPMENT: run post-install-info with ll:1 image'
+    cmds:
+     - task: apps-info
+       vars:
+        IMAGE: ll:1
+    silent: true
