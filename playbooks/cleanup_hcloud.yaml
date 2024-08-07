@@ -1,0 +1,33 @@
+---
+- name: Remove hcloud resources
+  hosts: node1
+  gather_facts: false
+  tasks:
+    - name: Install python3-hcloud on ansible host
+      delegate_to: localhost
+      ansible.builtin.apt:
+        name: python3-hcloud
+    - name: Delete VM 1 from hcloud
+      delegate_to: localhost
+      hetzner.hcloud.server:
+        api_token: "{{ hcloud_token }}"
+        name: "{{ node_name_1 }}"
+        state: absent
+    - name: Delete VM 2 from hcloud
+      delegate_to: localhost
+      hetzner.hcloud.server:
+        api_token: "{{ hcloud_token }}"
+        name: "{{ node_name_2 }}"
+        state: absent
+    - name: Delete VM 3 from hcloud
+      delegate_to: localhost
+      hetzner.hcloud.server:
+        api_token: "{{ hcloud_token }}"
+        name: "{{ node_name_3 }}"
+        state: absent
+    - name: Delete hcloud network
+      delegate_to: localhost
+      hetzner.hcloud.network:
+        api_token: "{{ hcloud_token }}"
+        name: "{{ hcloud_network }}"
+        state: absent

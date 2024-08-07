@@ -4,7 +4,7 @@ version: '3'
 
 tasks:
   default:
-    desc: this task lists all other tasks avalaible for landlubber
+    desc: List all other tasks avalaible for landlubber
     cmds:
       - echo "All cluster-creating tasks need docker to be running"
       - echo "Below you will find list of all tasks available"
@@ -16,7 +16,7 @@ tasks:
 
   init:
     desc: |
-      this task copies inventory.yml to ./output,
+      ->1️⃣  Copy inventory.yml to ./output,
       you can tailor it to your needs,
       to use landlubber you need to add your hcloud token to it
     env:
@@ -32,7 +32,7 @@ tasks:
 
   deploy:
     desc: |
-      this task runs landlubber in a container,
+      ->2️⃣  Runs landlubber in a container,
       before using this task, use 'task init',
       write your hcloud token in ./output/inventory.yml,
       and replace any values you would want to change
@@ -55,6 +55,16 @@ tasks:
           fi
         msg: "file ./output/inventory.yml needs NOT to be filled with IPs - run 'task init' first"
 
+  install-kubeconfig:
+    desc: |
+      ->3️⃣ ⚠️  Run this after running 'task deploy' to copy .kubeconfig to ~/.kube/config,
+      WARNING: this will overwrite existing ~/.kube/config
+    prompt: 'WARNING: this will overwrite existing ~/.kube/config - Continue?'
+    cmds:
+    - |
+      mkdir -p ./output
+      cp ./output/.kubeconfig ~/.kube/config
+
   apps-info:
     desc: |
       Run this after running 'task deploy' if you need to see again
@@ -70,19 +80,8 @@ tasks:
       task post-install-info
     silent: true
 
-  install-kubeconfig:
-    desc: |
-      Run this after running 'task deploy' to copy .kubeconfig to ~/.kube/config,
-      WARNING: this will overwrite existing ~/.kube/config
-    prompt: 'WARNING: this will overwrite existing ~/.kube/config - Do you want to continue?'
-    cmds:
-    - |
-      mkdir -p ./output
-      cp ./output/.kubeconfig ~/.kube/config
-
   upgrade-k3s:
-    desc: |
-      use this to upgrade k3s to latest version
+    desc: Upgrade k3s to latest version
     prompt: 'WARNING: this can lead to downtime or data loss, consider k8s version skew - Continue?'
     env:
       IMAGE: "{{.IMAGE}}"
@@ -97,13 +96,13 @@ tasks:
 
   kill-pw:
     desc: |
-      Run to kill all kubectl processes to stop any ongoing port-forwarding
+      Kill all kubectl processes to stop any ongoing port-forwarding
     cmds:
     - killall kubectl
 
   grafana:
     desc: |
-      Run to port-forward grafana to localhost:3000 and open it in your browser
+      Port-forward grafana to localhost:3000 and open it in your browser
     cmds:
     - kubectl port-forward service/vm-grafana 3000:80 -n victoria-metrics &
     - sleep 2
@@ -111,7 +110,7 @@ tasks:
 
   dashboard:
     desc: |
-      Run to port-forward dashboard to https://localhost:8443 and open it in your browser
+      Port-forward dashboard to https://localhost:8443 and open it in your browser
     cmds:
     - kubectl -n kubernetes-dashboard port-forward svc/kubernetes-dashboard-kong-proxy 8443:443 &
     - sleep 2
@@ -119,7 +118,7 @@ tasks:
 
   longhorn:
     desc: |
-      Run to port-forward longhorn UI to http://localhost:8080 and open it in your browser
+      Port-forward longhorn UI to http://localhost:8080 and open it in your browser
     cmds:
     - kubectl port-forward service/longhorn-frontend 8080:80 -n longhorn-system &
     - sleep 2
@@ -127,11 +126,27 @@ tasks:
 
   kubetail:
     desc: |
-      Run to port-forward kubetail to http://localhost:12345 and open it in your browser
+      Port-forward kubetail to http://localhost:12345 and open it in your browser
     cmds:
     - kubectl port-forward -n kubetail svc/kubetail 12345:80 &
     - sleep 2
     - xdg-open 'http://localhost:12345'
+
+  cleanup:
+    desc: |
+      ⚠️  Delete VMs and network from Hetzner Cloud,
+      delete files from ./output/
+      WARNING: total destruction ahead
+    prompt: 'WARNING: removing all VMs, network and output files - Continue?'
+    env:
+      IMAGE: "{{.IMAGE}}"
+    cmds:
+    - |
+      mkdir -p ./output
+      docker run --rm \
+      -v ./output:/landlubber/output \
+      {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
+      task cleanup
 
   init-dev:
     desc: 'DEVELOPMENT: get inventory file'
@@ -169,5 +184,12 @@ tasks:
     desc: 'DEVELOPMENT: k3s upgrade with ll:1 image'
     cmds:
      - task: upgrade-k3s
+       vars:
+        IMAGE: ll:1
+
+  cleanup-dev:
+    desc: 'DEVELOPMENT: cleanup with local image (ll:1)'
+    cmds:
+     - task: cleanup
        vars:
         IMAGE: ll:1

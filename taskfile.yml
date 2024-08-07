@@ -159,6 +159,12 @@ tasks:
       - kubectl apply -f ./manifests/update-crd.yaml
       - kubectl wait pod --all --for=condition=Ready --namespace=system-upgrade --timeout=600s
 
+  cleanup:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/cleanup_hcloud.yaml
+      - rm -rf /landlubber/output/*
+      - rm -rf /landlubber/output/.*
+
   post-install-info:
     cmds:
     - echo "DONE"
