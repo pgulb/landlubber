@@ -7,7 +7,7 @@
       delegate_to: localhost
       ansible.builtin.apt:
         name: python3-hcloud
-    - name: Provision VM \#1 on hcloud
+    - name: Provision VM 1 on hcloud
       delegate_to: localhost
       register: output_1
       hetzner.hcloud.server:
@@ -20,7 +20,7 @@
           - landlubber-key
         private_networks:
           - "{{ hcloud_network }}"
-    - name: Provision VM \#2 on hcloud
+    - name: Provision VM 2 on hcloud
       delegate_to: localhost
       register: output_2
       hetzner.hcloud.server:
@@ -33,7 +33,7 @@
           - landlubber-key
         private_networks:
           - "{{ hcloud_network }}"
-    - name: Provision VM \#3 on hcloud
+    - name: Provision VM 3 on hcloud
       delegate_to: localhost
       register: output_3
       hetzner.hcloud.server:
@@ -46,21 +46,21 @@
           - landlubber-key
         private_networks:
           - "{{ hcloud_network }}"
-    - name: Update inventory.yml with IP of VM \#1
+    - name: Update inventory.yml with IP of VM 1
       delegate_to: localhost
       ansible.builtin.replace:
         path: ../output/inventory.yml
         regexp: "NODEIP1"
         replace: "'{{ output_1.hcloud_server.ipv4_address }}'"
         backup: false
-    - name: Update inventory.yml with IP of VM \#2
+    - name: Update inventory.yml with IP of VM 2
       delegate_to: localhost
       ansible.builtin.replace:
         path: ../output/inventory.yml
         regexp: "NODEIP2"
         replace: "'{{ output_2.hcloud_server.ipv4_address }}'"
         backup: false
-    - name: Update inventory.yml with IP of VM \#3
+    - name: Update inventory.yml with IP of VM 3
       delegate_to: localhost
       ansible.builtin.replace:
         path: ../output/inventory.yml
