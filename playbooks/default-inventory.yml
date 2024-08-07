@@ -40,3 +40,13 @@ nodes:
     #
     hcloud_token: WRITE_TOKEN_HERE
     etc_hosts: /etc/hosts
+    #
+    # below vars are not used by ansible, but directly in taskfile
+    # for kubectl/helm
+    #
+    # additional applications to deploy to cluster
+    install_longhorn: true
+    install_victoria_metrics: true
+    install_k8s_dashboard: true
+    install_event_exporter: true
+    install_kubetail: true
