@@ -1,0 +1,19 @@
+---
+- name: Write slack token and channel name into config
+  hosts: node1
+  gather_facts: false
+  tasks:
+    - name: Update slack token in config file
+      delegate_to: localhost
+      ansible.builtin.replace:
+        path: /landlubber/manifests/event_exp_config.yml
+        regexp: 'SLACK_TOKEN'
+        replace: "{{ slack_token }}"
+        backup: false
+    - name: Update slack channel name in config file
+      delegate_to: localhost
+      ansible.builtin.replace:
+        path: /landlubber/manifests/event_exp_config.yml
+        regexp: 'SLACK_CHANNEL_NAME'
+        replace: "{{ slack_channel_name }}"
+        backup: false

@@ -24,7 +24,7 @@ tasks:
       - echo 'landlubber running'
       - task: ssh-keys
       - task: ansible-provision-network
-      - task: ansible-key_to_hcloud
+      - task: ansible-key-to-hcloud
       - task: ansible-provision-vms
       - task: ansible-selinux
       - task: ansible-dns
@@ -36,6 +36,7 @@ tasks:
       - task: kubectl-longhorn
       - task: kubectl-victoria-metrics
       - task: kubectl-k8s-dashboard
+      - task: ansible-slack-config
       - task: kubectl-event-exporter
       - task: kubectl-kubetail
       - task: kubectl-upgrade-controller
@@ -46,7 +47,7 @@ tasks:
     cmds:
       - ansible-playbook -i ./output/inventory.yml ./playbooks/provision_network.yaml
 
-  ansible-key_to_hcloud:
+  ansible-key-to-hcloud:
     cmds:
       - ansible-playbook -i ./output/inventory.yml ./playbooks/key_to_hcloud.yaml
 
@@ -163,6 +164,10 @@ tasks:
       - ansible-playbook -i ./output/inventory.yml ./playbooks/cleanup_hcloud.yaml
       - rm -rf /landlubber/output/*
       - rm -rf /landlubber/output/.*
+
+  ansible-slack-config:
+    cmds:
+      - ansible-playbook -i ./output/inventory.yml ./playbooks/slack_config.yaml
 
   post-install-info:
     cmds:

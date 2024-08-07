@@ -45,6 +45,7 @@ nodes:
 
     # change those to match your local user
     # files from ./output/ will be owned by uid:gid
+    # should be done automatically during 'task init'
     uid: YOUR_UID
     gid: YOUR_GID
 
@@ -52,13 +53,13 @@ nodes:
     # it is set to another value when tested in docker container
     etc_hosts: /etc/hosts
 
-    #
-    # below vars are not used by ansible, but directly in taskfile
-    # for kubectl/helm
-    #
     # additional applications to deploy to cluster
     install_longhorn: true
     install_victoria_metrics: true
     install_k8s_dashboard: true
     install_event_exporter: true
     install_kubetail: true
+
+    # event exporter config
+    slack_token: WRITE_SLACK_TOKEN_HERE
+    slack_channel_name: "k8s"
