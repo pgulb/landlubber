@@ -4,10 +4,12 @@ LABEL org.opencontainers.image.description="See https://github.com/pgulb/landlub
 ENV PATH="$PATH:/landlubber/bin"
 ENV ANSIBLE_STDOUT_CALLBACK=yaml
 
-RUN apt-get update && apt-get install openssh-client ca-certificates jq curl \
+RUN apt-get update && apt-get install wget openssh-client ca-certificates jq curl \
 python3 python3-pip -y && \
 rm -rf /var/lib/apt/lists/*
 RUN pip install ansible --break-system-packages --no-cache-dir
+ADD ./scripts/get_yq.sh .
+RUN ./get_yq.sh && rm -f ./get_yq.sh
 RUN mkdir -p /landlubber
 WORKDIR /landlubber
 RUN mkdir -p /etc/ansible && echo '[defaults]\n' > /etc/ansible/ansible.cfg && \
