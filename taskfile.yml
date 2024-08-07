@@ -40,6 +40,7 @@ tasks:
       - task: kubectl-k8s-dashboard
       - task: kubectl-event-exporter
       - task: kubectl-kubetail
+      - task: kubectl-upgrade-controller
       - task: post-install-info
 
   ansible-provision-network:
@@ -150,6 +151,13 @@ tasks:
           kubectl apply -f https://github.com/kubetail-org/kubetail/releases/latest/download/kubetail-clusterauth.yaml
           kubectl wait pod --all --for=condition=Ready --namespace=kubetail --timeout=600s
         fi
+
+  kubectl-upgrade-controller:
+    cmds:
+      - kubectl create namespace system-upgrade
+      - kubectl apply -f ./manifests/system-upgrade-controller.yaml
+      - kubectl apply -f ./manifests/update-crd.yaml
+      - kubectl wait pod --all --for=condition=Ready --namespace=system-upgrade --timeout=600s
 
   post-install-info:
     cmds:

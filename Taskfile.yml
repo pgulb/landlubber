@@ -80,6 +80,21 @@ tasks:
       mkdir -p ./output
       cp ./output/.kubeconfig ~/.kube/config
 
+  upgrade-k3s:
+    desc: |
+      use this to upgrade k3s to latest version
+    prompt: 'WARNING: this can lead to downtime or data loss, consider k8s version skew - Continue?'
+    env:
+      IMAGE: "{{.IMAGE}}"
+    cmds:
+    - |
+      mkdir -p ./output
+      docker run --rm \
+      -v ./output:/landlubber/output \
+      {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
+      /landlubber/scripts/update_cluster.sh
+    silent: true
+
   kill-pw:
     desc: |
       Run to kill all kubectl processes to stop any ongoing port-forwarding
@@ -149,3 +164,10 @@ tasks:
        vars:
         IMAGE: ll:1
     silent: true
+
+  upgrade-k3s-dev:
+    desc: 'DEVELOPMENT: k3s upgrade with ll:1 image'
+    cmds:
+     - task: upgrade-k3s
+       vars:
+        IMAGE: ll:1
