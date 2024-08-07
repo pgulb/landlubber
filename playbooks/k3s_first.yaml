@@ -28,3 +28,15 @@
         owner: root
         group: root
         mode: '0700'
+    - name: Download .kubeconfig file from first node
+      ansible.builtin.fetch:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: /landlubber/output/.kubeconfig
+        flat: true
+    - name: Update IP from 127.0.0.1 to first node's in .kubeconfig
+      delegate_to: localhost
+      ansible.builtin.replace:
+        path: /landlubber/output/.kubeconfig
+        regexp: '127\.0\.0\.1'
+        replace: "{{ ansible_host }}"
+        backup: false
