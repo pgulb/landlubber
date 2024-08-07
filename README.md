@@ -1,62 +1,76 @@
 # landlubber
 
-Dockerized script collection to provision 3-node Kubernetes ☸️ cluster on Hetzner CAX11 VMs  
-Monthly cost - 13,53€ (3 x 4.51) - check on https://www.hetzner.com/cloud/  
+Docker image tailored for creating 3-node `k3s` ☸️ cluster on Hetzner Cloud  
+Machines are cheap CAX11 `arm64` VMs (2 cores, 4GB RAM, 40GB disk)  
+Monthly cost - ~13,53€ (3 x 4.51) - verify on https://www.hetzner.com/cloud/  
+VMs are created in 3 zones, by default fsn1, nbg1, hel1 🌐  
   
-You can choose between k3s and kubeadm, with k3s recommended  
-k3s is lighter and comes with HA - all nodes are schedulable control plane  
-kubeadm is more 'mature' k8s deployment, but is more heavy, and it is installed with control
-plane only on node #1  
-k3s installation is also much faster 🚀  
+## features
+`Landlubber` is powered by 🅰️ Ansible  
   
-VMs are created in 3 zones: fsn1, nbg1, hel1 🌐  
-  
-Optional components to install:
-- metrics-server - https://github.com/kubernetes-sigs/metrics-server
+Optional k8s components include:
 - Longhorn (CSI provider) - https://longhorn.io/
 - VictoriaMetrics with Grafana - https://victoriametrics.com/
 - k8s Dashboard - https://github.com/kubernetes/dashboard
-- event-exporter - https://github.com/resmoio/kubernetes-event-exporter
+- event-exporter (Slack notifications) - https://github.com/resmoio/kubernetes-event-exporter
 - kubetail (web log explorer) - https://github.com/kubetail-org/kubetail
   
-k3s deployment comes with Rancher system-upgrade-controller  
-  
-Do not install components if you do not need them, resources are quite limited  
-Instead of dashboard one can use k9s or Monokle  
+You can limit which components will be installed to save compute resources  
+Instead of dashboard k9s or Monokle can be utilized  
   
 ## usage 🛠️
+### Prerequisites
+- `docker` running  
+- `task` (taskfile processor) - https://taskfile.dev/installation/  
+- Hetzner CLoud API token
   
-Create .env file with HCLOUD_TOKEN and INSTALL_METHOD with either k3s or kubeadm  
-add any values you would wish to override from default.env  
-KUBE_VER and CRI_DOCKERD_VER are used only if using kubeadm  
-INSTALL_METRICS_SERVER is regarded also only in kubeadm, k3s installs metrics-server anyway for now
+Optional:  
+- kubectl (port-forwarding)  
+- xdg-open (to automatically open forwarded UIs in browser)  
+- Slack token (for event-exporter) - https://api.slack.com/tutorials/tracks/getting-a-token
+- curl  
+- jq  
   
-If you want to use existing SSH key, add them to PUBKEY and PRIVKEY in .env and add to output
-directory which is added with volume in commands below  
-  
-Attach ./output dir to acquire generated SSH key, logs, kubeconfig file etc
-  
+---
+### Cluster Deployment  
+You can download latest taskfile if you have `curl` and `jq` using  
+(or just grab it manually from newest tag)  
 ```shell
-docker run --rm -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output ghcr.io/pgulb/landlubber:latest
+ver=$(curl -s https://api.github.com/repos/pgulb/landlubber/tags | jq -r '.[0].name'); curl -Of "https://raw.githubusercontent.com/pgulb/landlubber/$ver/Taskfile.yml"
 ```
   
-## connecting ⚡
-  
-You can connect to created nodes by ssh
-example for node #1:  
-  
+Then start with creating default config file - inventory.yml to ./output directory  
 ```shell
-docker run --rm -it -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output ghcr.io/pgulb/landlubber:latest ./connect.sh 1
+task init
 ```
   
+After typing your hcloud token in that file and making any wanted changes, you can deploy cluster  
+```shell
+task deploy
+```
+  
+When your cluster is ready, you can copy .kubeconfig file to ~/.kube
+```shell
+task install-kubeconfig
+```
+  
+You are all set 🚀  
+   
+---
+If you want to view all avalaible tasks, simply run
+```shell
+task
+```
+There are some useful tasks, for example port-forwarding services
+```shell
+task grafana
+```
 ## upgrade ⚡
   
-Run this command to upgrade k3s cluster  
-Run without version specified to show newest release avalaible  
-Consider k8s version skew - https://kubernetes.io/releases/version-skew-policy/  
+Consider k8s version skew before upgrade - https://kubernetes.io/releases/version-skew-policy/  
   
 ```shell
-docker run --rm -it -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output ghcr.io/pgulb/landlubber:latest ./update_cluster.sh <k3s_version>
+task upgrade-k3s
 ```
   
 ## cleanup 🧹
@@ -64,6 +78,6 @@ docker run --rm -it -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output
 To remove existing VMs and clean output files, run  
   
 ```shell
-docker run --rm -v ./.env:/landlubber/.env:ro -v ./output:/landlubber/output ghcr.io/pgulb/landlubber:latest ./remove.sh
+task cleanup
 ```
   
