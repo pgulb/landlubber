@@ -28,7 +28,10 @@ tasks:
       -v ./output:/landlubber/output \
       {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
       task init
-      echo "after filling inventory file, run 'task deploy' to start landlubber"
+    - sed -i s/YOUR_UID/$UID/g ./output/inventory.yml
+    - sed -i s/YOUR_GID/$GID/g ./output/inventory.yml
+    - chown -R $UID:$GID ./output/
+    - echo "after filling inventory file, run 'task deploy' to start landlubber"
 
   deploy:
     desc: |
@@ -63,6 +66,7 @@ tasks:
     cmds:
     - |
       mkdir -p ./output
+      mkdir -p ~/.kube/
       cp ./output/.kubeconfig ~/.kube/config
 
   apps-info:
