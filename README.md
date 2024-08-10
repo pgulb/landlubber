@@ -1,5 +1,7 @@
 # landlubber
-
+  
+<img src="./landlubber_logo.png" alt="logo" width="512" height="512"/>
+  
 Docker image tailored for creating 3-node `k3s` ☸️ cluster on Hetzner Cloud  
 Machines are cheap CAX11 `arm64` VMs (2 cores, 4GB RAM, 40GB disk)  
 Monthly cost - ~13,53€ (3 x 4.51) - verify on https://www.hetzner.com/cloud/  
