@@ -1,13 +1,6 @@
 # landlubber
   
-<style>
-img {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-</style>
-<img src="./landlubber_logo.png" alt="logo" width="512" height="512"/>
+<img src="./landlubber_logo.png" alt="logo" align="center" width="512" height="512"/>
   
 Docker image tailored for creating 3-node `k3s` ☸️ cluster on Hetzner Cloud  
 Machines are cheap CAX11 `arm64` VMs (2 cores, 4GB RAM, 40GB disk)  
