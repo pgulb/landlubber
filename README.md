@@ -63,7 +63,7 @@ If you want to view all avalaible tasks, simply run
 ```shell
 task
 ```
-There are some useful tasks, for example port-forwarding services
+There are some useful tasks, for example port-forwarding grafana service:
 ```shell
 task grafana
 ```
