@@ -24,7 +24,7 @@ Instead of dashboard k9s or Monokle can be utilized
 ### Prerequisites
 - `docker` running  
 - `task` (taskfile processor) - https://taskfile.dev/installation/  
-- Hetzner CLoud API token
+- Hetzner Cloud API token
   
 Optional:  
 - kubectl (port-forwarding)  
