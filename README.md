@@ -35,7 +35,7 @@ Optional:
   
 ---
 ### Cluster Deployment  
-You can download latest taskfile if you have `curl` and `jq` using  
+You can download latest Taskfile.yml (the one with uppercase T) if you have `curl` and `jq` using  
 (or just grab it manually from newest tag)  
 ```shell
 ver=$(curl -s https://api.github.com/repos/pgulb/landlubber/tags | jq -r '.[0].name'); curl -Of "https://raw.githubusercontent.com/pgulb/landlubber/$ver/Taskfile.yml"
