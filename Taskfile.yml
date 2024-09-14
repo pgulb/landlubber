@@ -2,6 +2,9 @@
 
 version: '3'
 
+env:
+  IMAGE: "ghcr.io/pgulb/landlubber:v1.1.0"
+
 tasks:
   default:
     desc: List all other tasks avalaible for landlubber
