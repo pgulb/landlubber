@@ -1,0 +1,38 @@
+name: test-manifests
+
+on:
+    workflow_run:
+        workflows:
+            - test-playbooks
+        branches:
+            - main
+        types:
+            - completed
+
+jobs:
+    run-k3d:
+        name: run-k3d
+        runs-on: ubuntu-latest
+        steps:
+            - name: get Taskfile.yml
+              uses: actions/checkout@v4
+              with:
+                sparse-checkout: |
+                    Taskfile.yml
+                sparse-checkout-cone-mode: false
+            - name: install Task
+              run: sh -c "$(curl --location https://taskfile.dev/install.sh)" -- -d -b ~/.local/bin
+            - name: install k3d
+              run: curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+            - name: run tests
+              run: task test-k3d
+    #test-manifests:
+    #    name: test-manifests
+    #    runs-on: ubuntu-latest
+    #    defaults:
+    #        run:
+    #            working-directory: /landlubber
+    #    container: ghcr.io/pgulb/landlubber:main
+    #    steps:
+    #        - name: run Ansible tests
+    #          run: task test

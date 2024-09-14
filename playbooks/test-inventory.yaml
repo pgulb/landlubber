@@ -12,3 +12,14 @@ nodes:
     node_name_3: kube-node-3
     # /etc/hosts is tricky in docker containers
     etc_hosts: /etc/hosts2
+
+    # additional applications to deploy to cluster
+    install_longhorn: true
+    install_victoria_metrics: true
+    install_k8s_dashboard: true
+    install_event_exporter: true
+    install_kubetail: true
+
+    # event exporter config
+    slack_token: WRITE_SLACK_TOKEN_HERE
+    slack_channel_name: "k8s"

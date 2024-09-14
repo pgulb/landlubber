@@ -199,7 +199,7 @@ tasks:
         IMAGE: ll:1
 
   test:
-    desc: 'DEVELOPMENT: run tests with local image (ll:1) and rocky-ansible-tester'
+    desc: 'DEVELOPMENT: run Ansible tests with local image (ll:1) and rocky-ansible-tester'
     cmds:
       - mkdir -p ./output
       - docker network create ansible-test
@@ -219,3 +219,23 @@ tasks:
     cmds:
       - docker rm -f ansible-node
       - docker network rm ansible-test
+      - rm -rf ./output/*
+      - rm -rf ./output/.*
+
+  test-k3d:
+    desc: 'DEVELOPMENT: run k8s manifest tests with local image (ll:1) and k3d'
+    cmds:
+    - mkdir -p ./output
+    - k3d cluster create landlubber-test --servers 3
+    - k3d kubeconfig get landlubber-test > ./output/.kubeconfig
+    - chmod 600 ./output/.kubeconfig
+    - |
+        docker run -it --rm --name ll --net=host \
+        -v ./output:/landlubber/output ll:1 task test-k3d
+    - kubectl get po -A
+    - kubectl get no
+    - |
+      kubectl get pods -A --no-headers | grep \
+      -v 'Running' | grep -v 'Completed' \
+      && exit 1 || echo 'PODS OK'
+    - k3d cluster delete landlubber-test

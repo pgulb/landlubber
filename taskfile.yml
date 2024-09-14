@@ -219,3 +219,16 @@ tasks:
       - task: ansible-initial-packages
       - task: ansible-initial-services
       - task: ansible-helm
+
+  test-k3d:
+    cmds:
+      - mkdir -p ./output
+      - cp ./playbooks/test-inventory.yaml ./output/inventory.yml
+      - task: kubectl-victoria-metrics
+      - task: kubectl-k8s-dashboard
+      - task: ansible-slack-config
+      - task: kubectl-event-exporter
+      - task: kubectl-kubetail
+      - task: kubectl-upgrade-controller
+      - rm -rf ./output/*
+      - rm -rf ./output/.*
