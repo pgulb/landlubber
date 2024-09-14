@@ -24,17 +24,5 @@ jobs:
                     - /sys/fs/cgroup:/sys/fs/cgroup:rw
                 options: --privileged --cgroupns=host
         steps:
-            - name: install sshpass and ping
-              run: apt-get update; apt-get install sshpass iputils-ping -y
-            - name: ping the node
-              run: ping -4 -c 1 ansible-node
-            - name: test disabling selinux
-              run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/selinux.yaml
-            - name: test adding dns settings
-              run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/dns.yaml
-            - name: test installing initial packages
-              run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/initial_packages.yaml
-            - name: test setting up initial services
-              run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/initial_services.yaml
-            - name: test installing helm
-              run: ansible-playbook -i ./playbooks/test-inventory.yaml ./playbooks/helm.yaml
+            - name: run Ansible tests
+              run: task test

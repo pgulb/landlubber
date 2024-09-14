@@ -208,3 +208,14 @@ tasks:
     - echo
     - echo "*** BE PATIENT WHILE PODS ARE STARTING UP 🚀 ***"  
     silent: true
+
+  test:
+    cmds:
+      - apt update && apt install sshpass -y
+      - mkdir -p ./output
+      - cp ./playbooks/test-inventory.yaml ./output/inventory.yml
+      - task: ansible-selinux
+      - task: ansible-dns
+      - task: ansible-initial-packages
+      - task: ansible-initial-services
+      - task: ansible-helm

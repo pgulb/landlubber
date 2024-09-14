@@ -1,4 +1,4 @@
-rocky_hosts:
+nodes:
   hosts:
     node1:
       ansible_host: ansible-node
