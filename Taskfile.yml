@@ -226,7 +226,7 @@ tasks:
     desc: 'DEVELOPMENT: run k8s manifest tests with local image (ll:1) and k3d'
     cmds:
     - mkdir -p ./output
-    - k3d cluster create landlubber-test #--servers 3
+    - k3d cluster create landlubber-test --servers 3
     - k3d kubeconfig get landlubber-test > ./output/.kubeconfig
     - chmod 600 ./output/.kubeconfig
     - |
