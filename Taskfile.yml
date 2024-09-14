@@ -3,7 +3,7 @@
 version: '3'
 
 env:
-  IMAGE: "ghcr.io/pgulb/landlubber:v1.1.0"
+  IMAGE: "ghcr.io/pgulb/landlubber:v1.2.0"
 
 tasks:
   default:
