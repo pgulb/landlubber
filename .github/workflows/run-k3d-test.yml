@@ -26,13 +26,3 @@ jobs:
               run: curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
             - name: run tests
               run: task test-k3d
-    #test-manifests:
-    #    name: test-manifests
-    #    runs-on: ubuntu-latest
-    #    defaults:
-    #        run:
-    #            working-directory: /landlubber
-    #    container: ghcr.io/pgulb/landlubber:main
-    #    steps:
-    #        - name: run Ansible tests
-    #          run: task test

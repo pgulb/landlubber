@@ -230,7 +230,7 @@ tasks:
     - k3d kubeconfig get landlubber-test > ./output/.kubeconfig
     - chmod 600 ./output/.kubeconfig
     - |
-        docker run -it --rm --name ll --net=host \
+        docker run --rm --name ll --net=host \
         -v ./output:/landlubber/output ll:1 task test-k3d
     - kubectl get po -A
     - kubectl get no
