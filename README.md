@@ -63,7 +63,7 @@ If you want to view all avalaible tasks, simply run
 ```shell
 task
 ```
-There are some useful tasks, for example port-forwarding grafana service:
+There are some tasks useful after deployment, for example port-forwarding grafana service:
 ```shell
 task grafana
 ```
