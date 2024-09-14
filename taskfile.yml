@@ -230,5 +230,6 @@ tasks:
       - task: kubectl-event-exporter
       - task: kubectl-kubetail
       - task: kubectl-upgrade-controller
-      - rm -rf ./output/*
-      - rm -rf ./output/.*
+      - kubectl get po -A
+      - kubectl get no
+      - task: post-install-info

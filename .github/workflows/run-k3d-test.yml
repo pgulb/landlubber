@@ -25,4 +25,4 @@ jobs:
             - name: install k3d
               run: curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
             - name: run tests
-              run: IMAGE="ghcr.io/pgulb/landlubber:main" task test-k3d
+              run: task test-k3d

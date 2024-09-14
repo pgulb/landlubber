@@ -22,14 +22,14 @@ tasks:
       ->1️⃣  Copy inventory.yml to ./output,
       you can tailor it to your needs,
       to use landlubber you need to add your hcloud token to it
-    env:
-      IMAGE: "{{.IMAGE}}"
     cmds:
     - |
+      echo $IMAGE
+      echo $LOCAL_IMAGE
       mkdir -p ./output
       docker run --rm \
       -v ./output:/landlubber/output \
-      {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
+      {{.LOCAL_IMAGE | default .IMAGE}} \
       task init
     - sed -i s/YOUR_UID/$UID/g ./output/inventory.yml
     - sed -i s/YOUR_GID/$GID/g ./output/inventory.yml
@@ -42,14 +42,12 @@ tasks:
       before using this task, use 'task init',
       write your hcloud token in ./output/inventory.yml,
       and replace any values you would want to change
-    env:
-      IMAGE: "{{.IMAGE}}"
     cmds:
     - |
       mkdir -p ./output
       docker run --rm \
       -v ./output:/landlubber/output \
-      {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
+      {{.LOCAL_IMAGE | default .IMAGE}} \
       task deploy
     preconditions:
       - sh: |
@@ -83,9 +81,8 @@ tasks:
       mkdir -p ./output
       docker run --rm \
       -v ./output:/landlubber/output \
-      {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
+      {{.LOCAL_IMAGE | default .IMAGE}} \
       task post-install-info
-    silent: true
 
   upgrade-k3s:
     desc: Upgrade k3s to latest version
@@ -97,9 +94,8 @@ tasks:
       mkdir -p ./output
       docker run --rm \
       -v ./output:/landlubber/output \
-      {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
+      {{.LOCAL_IMAGE | default .IMAGE}} \
       /landlubber/scripts/update_cluster.sh
-    silent: true
 
   kill-pw:
     desc: |
@@ -145,29 +141,54 @@ tasks:
       delete files from ./output/
       WARNING: total destruction ahead
     prompt: 'WARNING: removing all VMs, network and output files - Continue?'
-    env:
-      IMAGE: "{{.IMAGE}}"
     cmds:
     - |
       mkdir -p ./output
       docker run --rm \
       -v ./output:/landlubber/output \
-      {{.IMAGE | default "ghcr.io/pgulb/landlubber:latest"}} \
+      {{.LOCAL_IMAGE | default .IMAGE}} \
       task cleanup
+
+  spin-local-k3d:
+    desc: Spin up local k3d cluster and deploy default manifests
+    cmds:
+    - task: deploy-k3d
+      vars:
+        LOCAL_IMAGE: "{{.LOCAL_IMAGE | default .IMAGE}}"
+    - echo '*** k3d cluster deployed ***'
+
+  delete-local-k3d:
+    desc: ⚠️  Delete local k3d cluster and output files
+    cmds:
+    - k3d cluster delete landlubber-test
+    - rm -rf ./output/*
+    - rm -rf ./output/.*
+
+  development-tasks-below:
+    desc: '---------------------------------------------------------------'
+    cmds:
+      - echo
+
+  spin-local-k3d-dev:
+    desc: 'DEVELOPMENT: local k3d cluster with local landlubber image'
+    cmds:
+    - task: spin-local-k3d
+      vars:
+        LOCAL_IMAGE: ll:1
 
   init-dev:
     desc: 'DEVELOPMENT: get inventory file'
     cmds:
      - task: init
        vars:
-        IMAGE: ll:1
+        LOCAL_IMAGE: ll:1
 
   deploy-dev:
     desc: 'DEVELOPMENT: run landlubber with local image (ll:1)'
     cmds:
      - task: deploy
        vars:
-        IMAGE: ll:1
+        LOCAL_IMAGE: ll:1
 
   build-dev:
     desc: 'DEVELOPMENT: build image locally as ll:1'
@@ -184,7 +205,7 @@ tasks:
     cmds:
      - task: apps-info
        vars:
-        IMAGE: ll:1
+        LOCAL_IMAGE: ll:1
     silent: true
 
   upgrade-k3s-dev:
@@ -192,14 +213,14 @@ tasks:
     cmds:
      - task: upgrade-k3s
        vars:
-        IMAGE: ll:1
+        LOCAL_IMAGE: ll:1
 
   cleanup-dev:
     desc: 'DEVELOPMENT: cleanup with local image (ll:1)'
     cmds:
      - task: cleanup
        vars:
-        IMAGE: ll:1
+        LOCAL_IMAGE: ll:1
 
   test:
     desc: 'DEVELOPMENT: run Ansible tests with local image (ll:1) and rocky-ansible-tester'
@@ -225,22 +246,43 @@ tasks:
       - rm -rf ./output/*
       - rm -rf ./output/.*
 
-  test-k3d:
-    desc: 'DEVELOPMENT: run k8s manifest tests with local image (ll:1) and k3d'
+  deploy-k3d:
     cmds:
+    - echo {{.LOCAL_IMAGE | default .IMAGE}}
     - mkdir -p ./output
     - k3d cluster create landlubber-test --servers 3
     - k3d kubeconfig get landlubber-test > ./output/.kubeconfig
     - chmod 600 ./output/.kubeconfig
     - |
-        docker run --rm --name ll --net=host \
-        -v ./output:/landlubber/output \
-        {{.IMAGE | default "ll:1"}} \
-        task test-k3d
-    - kubectl get po -A
-    - kubectl get no
+      docker run --rm --name ll --net=host \
+      -v ./output:/landlubber/output \
+      {{.LOCAL_IMAGE | default .IMAGE}} \
+      task test-k3d
+
+  meta-test-k3d:
+    cmds:
+    - echo {{.LOCAL_IMAGE | default .IMAGE}}
+    - task: deploy-k3d
+      vars:
+        LOCAL_IMAGE: "{{.LOCAL_IMAGE | default .IMAGE}}"
     - |
       kubectl get pods -A --no-headers | grep \
       -v 'Running' | grep -v 'Completed' \
       && exit 1 || echo 'PODS OK'
     - k3d cluster delete landlubber-test
+    - rm -rf ./output/*
+    - rm -rf ./output/.*
+
+  test-k3d:
+    desc: 'DEVELOPMENT: CI tests with k3d'
+    cmds:
+    - task: meta-test-k3d
+      vars:
+        LOCAL_IMAGE: ghcr.io/pgulb/landlubber:main
+
+  test-k3d-dev:
+    desc: 'DEVELOPMENT: local tests with k3d'
+    cmds:
+    - task: meta-test-k3d
+      vars:
+        LOCAL_IMAGE: ll:1

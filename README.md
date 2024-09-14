@@ -83,3 +83,20 @@ To remove existing VMs and clean output files, run
 task cleanup
 ```
   
+## local k3d  
+  
+You can setup local 3-node k3d cluster with  
+  
+```shell
+task spin-local-k3d
+```
+  
+and then remove it with  
+  
+```shell
+task delete-local-k3d
+```
+  
+Cluster will be equipped with all apps except Longhorn (not supported by k3d)  
+Port-forwarding tasks work for this cluster just like for cloud-based one  
+  
