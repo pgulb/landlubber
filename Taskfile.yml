@@ -226,12 +226,14 @@ tasks:
     desc: 'DEVELOPMENT: run k8s manifest tests with local image (ll:1) and k3d'
     cmds:
     - mkdir -p ./output
-    - k3d cluster create landlubber-test --servers 3
+    - k3d cluster create landlubber-test #--servers 3
     - k3d kubeconfig get landlubber-test > ./output/.kubeconfig
     - chmod 600 ./output/.kubeconfig
     - |
         docker run --rm --name ll --net=host \
-        -v ./output:/landlubber/output ll:1 task test-k3d
+        -v ./output:/landlubber/output \
+        {{.IMAGE | default "ll:1"}} \
+        task test-k3d
     - kubectl get po -A
     - kubectl get no
     - |
