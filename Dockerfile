@@ -1,4 +1,4 @@
-FROM ubuntu:noble-20240407.1
+FROM ubuntu:noble-20250404
 
 LABEL org.opencontainers.image.description="See https://github.com/pgulb/landlubber for usage."
 ENV PATH="$PATH:/landlubber/bin"
